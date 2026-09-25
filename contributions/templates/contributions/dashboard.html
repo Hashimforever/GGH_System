@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% block title %}Contributions Dashboard{% endblock %}
+{% block page_title %}Contributions Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-3">
+        <a href="{% url 'contributions:generate' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Generate Expected Payments</a>
+        <a href="{% url 'contributions:record' %}" class="btn btn-success"><i class="fas fa-money-bill"></i> Bulk Record Matrix</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card card-primary">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
+                <h3 class="card-title mb-0"><i class="fas fa-table"></i> Contributions Summary ({{ year }})</h3>
+                <form method="get" class="form-inline mt-1 mt-md-0">
+                    <label class="mr-2 text-white d-none d-md-inline">Year:</label>
+                    <select name="year" class="form-control form-control-sm" onchange="this.form.submit()">
+                        {% for y in year_range %}
+                        <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+
+            <div class="card-body p-0">
+                <!-- Responsive wrapper with horizontal scroll on small screens -->
+                <div class="table-responsive">
+                    <table id="contributionMatrix"
+                           class="table table-bordered table-hover table-sm mb-0"
+                           style="min-width: 700px;">
+                        <thead class="thead-dark">
+                            <tr>
+                                <!-- Sticky member column -->
+                                <th style="min-width:130px; position:sticky; left:0; z-index:2; background:#343a40;">Member</th>
+                                <th class="text-center">Jan</th>
+                                <th class="text-center">Feb</th>
+                                <th class="text-center">Mar</th>
+                                <th class="text-center">Apr</th>
+                                <th class="text-center">May</th>
+                                <th class="text-center">Jun</th>
+                                <th class="text-center">Jul</th>
+                                <th class="text-center">Aug</th>
+                                <th class="text-center">Sep</th>
+                                <th class="text-center">Oct</th>
+                                <th class="text-center">Nov</th>
+                                <th class="text-center">Dec</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in matrix %}
+                            <tr>
+                                <td style="position:sticky; left:0; z-index:1; background:#fff; white-space:nowrap; font-weight:600;">
+                                    <a href="{% url 'contributions:member_profile' row.member.id %}?year={{ year }}" class="text-dark">
+                                        {{ row.member.first_name }} {{ row.member.last_name }}
+                                    </a>
+                                </td>
+                                {% for m_data in row.months %}
+                                <td class="text-center p-1">
+                                    {% if m_data.status == 'paid' %}
+                                        <span class="badge badge-success" title="Paid">
+                                            <i class="fas fa-check d-md-none"></i>
+                                            <span class="d-none d-md-inline">✔ Paid</span>
+                                        </span>
+                                    {% elif m_data.status == 'partial' %}
+                                        <span class="badge badge-warning text-dark" title="Partial">
+                                            <i class="fas fa-adjust d-md-none"></i>
+                                            <span class="d-none d-md-inline">~ Partial</span>
+                                        </span>
+                                    {% else %}
+                                        <span class="badge badge-danger" title="Unpaid">
+                                            <i class="fas fa-times d-md-none"></i>
+                                            <span class="d-none d-md-inline">✗ Unpaid</span>
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div><!-- /.table-responsive -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function () {
+    $('#contributionMatrix').DataTable({
+        responsive: false,          // We handle responsiveness via sticky column + horizontal scroll
+        scrollX: true,              // Enable DataTables horizontal scroll
+        fixedColumns: {             // Keep the Member column pinned while scrolling
+            leftColumns: 1
+        },
+        pageLength: 25,
+        lengthMenu: [10, 25, 50, 100],
+        dom: "<'row mb-2'<'col-sm-12 col-md-6'B><'col-sm-12 col-md-6'f>>" +
+             "<'row'<'col-sm-12'tr>>" +
+             "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+        buttons: [
+            { extend: 'copy',  className: 'btn btn-sm btn-default' },
+            { extend: 'csv',   className: 'btn btn-sm btn-default' },
+            { extend: 'excel', className: 'btn btn-sm btn-default' },
+            { extend: 'pdf',   className: 'btn btn-sm btn-default' },
+            { extend: 'print', className: 'btn btn-sm btn-default' },
+        ],
+        language: {
+            search: "Global Search:"
+        },
+        initComplete: function () {
+            this.api().columns().every(function () {
+                var column = this;
+                var title = $(column.header()).contents().filter(function() {
+                    return this.nodeType == 3;
+                }).text().trim();
+                
+                if (!title) return;
+
+                // Create select element
+                var select = $('<select class="form-control form-control-sm mt-1" style="font-weight: normal; width: 100%; min-width: 80px;"><option value="">All</option></select>')
+                    .appendTo($(column.header()))
+                    .on('change', function () {
+                        var val = $.fn.dataTable.util.escapeRegex($(this).val());
+                        column.search(val ? '^' + val + '$' : '', true, false).draw();
+                    })
+                    .on('click', function(e) {
+                        e.stopPropagation();
+                    });
+
+                // Extract unique data
+                column.data().unique().sort().each(function (d, j) {
+                    var val = $('<div/>').html(d).text().trim();
+                    // Clean up specific labels if needed
+                    val = val.replace('✔', '').replace('~', '').replace('✗', '').trim();
+                    if (val !== '' && select.find("option[value='" + val.replace(/'/g, "\\'") + "']").length === 0) {
+                        select.append('<option value="' + val + '">' + val + '</option>');
+                    }
+                });
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

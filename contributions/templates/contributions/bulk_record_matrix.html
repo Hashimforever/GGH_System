@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}Record Contributions{% endblock %}
+{% block page_title %}Bulk Record Contributions - {{ year }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-3">
+        <a href="{% url 'contributions:dashboard' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">Year: {{ year }}</h3>
+                <div class="card-tools">
+                    <form method="get" class="form-inline">
+                        <select name="year" class="form-control form-control-sm" onchange="this.form.submit()">
+                            {% for y in year_range %}
+                            <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                </div>
+            </div>
+            <div class="card-body table-responsive p-0">
+                <form method="POST">
+                    {% csrf_token %}
+                    <table class="table table-bordered table-hover text-nowrap table-sm">
+                        <thead class="thead-light">
+                            <tr>
+                                <th style="min-width: 150px; position: sticky; left: 0; background-color: #f8f9fa; z-index: 1;">Member</th>
+                                <th>Reg. Fee<br><small>(Exp: ${{ expected_reg_fee|floatformat:2 }})</small></th>
+                                <th>Jan</th>
+                                <th>Feb</th>
+                                <th>Mar</th>
+                                <th>Apr</th>
+                                <th>May</th>
+                                <th>Jun</th>
+                                <th>Jul</th>
+                                <th>Aug</th>
+                                <th>Sep</th>
+                                <th>Oct</th>
+                                <th>Nov</th>
+                                <th>Dec</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in matrix %}
+                            <tr>
+                                <td style="position: sticky; left: 0; background-color: #fff; z-index: 1;">
+                                    <strong>{{ row.member.first_name }} {{ row.member.last_name }}</strong>
+                                </td>
+                                <td>
+                                    {% if expected_reg_fee > 0 and row.reg_fee_paid >= expected_reg_fee %}
+                                        <input type="number" step="0.01" style="width: 70px;"
+                                               name="reg_fee_{{ row.member.id }}"
+                                               value="{{ row.reg_fee_paid|floatformat:2 }}"
+                                               readonly
+                                               class="form-control form-control-sm bg-light text-success font-weight-bold"
+                                               title="Registration fee fully paid">
+                                        <small class="text-success d-block"><i class="fas fa-check-circle"></i> Paid</small>
+                                    {% else %}
+                                        <input type="number" step="0.01" style="width: 70px;"
+                                               name="reg_fee_{{ row.member.id }}"
+                                               value="{% if row.reg_fee_paid > 0 %}{{ row.reg_fee_paid|floatformat:2 }}{% endif %}"
+                                               class="form-control form-control-sm {% if row.reg_fee_paid > 0 %}border-warning{% endif %}"
+                                               placeholder="{{ expected_reg_fee|floatformat:2 }}"
+                                               title="Expected: {{ expected_reg_fee|floatformat:2 }}">
+                                        {% if row.reg_fee_paid > 0 %}
+                                        <small class="text-warning d-block"><i class="fas fa-exclamation-circle"></i> Partial</small>
+                                        {% else %}
+                                        <small class="text-muted d-block">Exp: {{ expected_reg_fee|floatformat:2 }}</small>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                                {% for m_data in row.months %}
+                                <td>
+                                    <input type="number" step="0.01" class="form-control form-control-sm" style="width: 70px;" 
+                                           name="amount_{{ row.member.id }}_{{ m_data.month }}" 
+                                           value="{% if m_data.amount_paid > 0 %}{{ m_data.amount_paid|floatformat:2 }}{% endif %}">
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="p-3 bg-light border-top text-right">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-save"></i> Save All Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

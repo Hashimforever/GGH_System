@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Record Payments (Matrix){% endblock %}
+{% block page_title %}Contributions for {{ year }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-3">
+        <form method="get" class="form-inline">
+            <label class="mr-2">Year:</label>
+            <input type="number" name="year" value="{{ year }}" class="form-control mr-2" style="width: 100px;">
+            <button type="submit" class="btn btn-primary">Change Year</button>
+        </form>
+    </div>
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">12 Months Payment Record</h3>
+            </div>
+            <div class="card-body p-0 table-responsive" style="max-height: 70vh;">
+                <table class="table table-bordered table-sm text-center table-head-fixed">
+                    <thead>
+                        <tr>
+                            <th class="text-left">Member</th>
+                            <th>Jan</th><th>Feb</th><th>Mar</th>
+                            <th>Apr</th><th>May</th><th>Jun</th>
+                            <th>Jul</th><th>Aug</th><th>Sep</th>
+                            <th>Oct</th><th>Nov</th><th>Dec</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in matrix %}
+                        <tr>
+                            <td class="text-left text-nowrap">
+                                <strong>{{ row.member.last_name }}, {{ row.member.first_name }}</strong><br>
+                                <small class="text-muted">{{ row.member.member_id }}</small>
+                            </td>
+                            {% for m in row.months %}
+                            <td class="align-middle">
+                                {% if m.status == 'paid' %}
+                                    <button class="btn btn-success btn-xs toggle-payment" 
+                                            data-member="{{ row.member.id }}" 
+                                            data-month="{{ m.month }}" 
+                                            data-year="{{ year }}" 
+                                            data-status="paid">Paid</button>
+                                {% elif m.status == 'partial' %}
+                                    <button class="btn btn-warning btn-xs toggle-payment" 
+                                            data-member="{{ row.member.id }}" 
+                                            data-month="{{ m.month }}" 
+                                            data-year="{{ year }}" 
+                                            data-status="paid">Partial</button>
+                                {% else %}
+                                    <button class="btn btn-danger btn-xs toggle-payment" 
+                                            data-member="{{ row.member.id }}" 
+                                            data-month="{{ m.month }}" 
+                                            data-year="{{ year }}" 
+                                            data-status="unpaid">Unpaid</button>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    $('.toggle-payment').click(function(e) {
+        e.preventDefault();
+        var btn = $(this);
+        var memberId = btn.data('member');
+        var month = btn.data('month');
+        var year = btn.data('year');
+        var currentStatus = btn.data('status');
+        
+        // Disable temporarily
+        btn.prop('disabled', true);
+        btn.text('...');
+        
+        $.ajax({
+            url: "{% url 'contributions:toggle_payment' %}",
+            type: 'POST',
+            data: JSON.stringify({
+                member_id: memberId,
+                month: month,
+                year: year,
+                status: currentStatus
+            }),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if(response.success) {
+                    if (response.new_status === 'paid') {
+                        btn.removeClass('btn-danger btn-warning').addClass('btn-success');
+                        btn.text('Paid');
+                        btn.data('status', 'paid');
+                    } else {
+                        btn.removeClass('btn-success btn-warning').addClass('btn-danger');
+                        btn.text('Unpaid');
+                        btn.data('status', 'unpaid');
+                    }
+                } else {
+                    alert("Error: " + response.error);
+                    // Revert text
+                    btn.text(currentStatus === 'paid' ? 'Paid' : (currentStatus === 'unpaid' ? 'Unpaid' : 'Partial'));
+                }
+            },
+            error: function() {
+                alert("Network error.");
+                btn.text(currentStatus === 'paid' ? 'Paid' : (currentStatus === 'unpaid' ? 'Unpaid' : 'Partial'));
+            },
+            complete: function() {
+                btn.prop('disabled', false);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

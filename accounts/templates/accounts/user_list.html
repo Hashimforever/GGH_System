@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Manage Users{% endblock %}
+{% block page_title %}Manage Users{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">System Users</h3>
+    <div class="card-tools">
+      <a href="{% url 'accounts:user_create' %}" class="btn btn-sm btn-primary">
+        <i class="fas fa-plus"></i> Add User
+      </a>
+    </div>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-striped datatable">
+      <thead><tr><th>Username</th><th>Name</th><th>Email</th><th>Roles</th><th>Staff</th><th>Active</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td>{{ u.username }}</td>
+          <td>{{ u.get_full_name }}</td>
+          <td>{{ u.email }}</td>
+          <td>{% for r in u.roles.all %}<span class="badge badge-info">{{ r.name }}</span> {% endfor %}</td>
+          <td>{% if u.is_staff %}<i class="fas fa-check text-success"></i>{% else %}<i class="fas fa-times text-danger"></i>{% endif %}</td>
+          <td>{% if u.is_active %}<i class="fas fa-check text-success"></i>{% else %}<i class="fas fa-times text-danger"></i>{% endif %}</td>
+          <td>
+            <a href="{% url 'accounts:user_update' u.pk %}" class="btn btn-xs btn-primary"><i class="fas fa-edit"></i></a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

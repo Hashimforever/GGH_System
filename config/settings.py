@@ -25,19 +25,35 @@ SECRET_KEY = 'django-insecure-)+l(pzmw6dwg=5&7gwf6#gy_*ca-=8xw=1f1=7@r)e(qry7co%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Third-party apps
+    # Local apps
+    'core',
+    'accounts',
+    'members',
+    'committee',
+    'contributions',
+    'finance',
+    'loans',
+    'reports',
+    'audit',
+    'documents',
 ]
+
+AUTH_USER_MODEL = 'accounts.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -47,6 +63,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'audit.middleware.AuditMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -54,7 +71,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -124,4 +141,40 @@ MAILERS = {
     'default': {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
+}
+
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+LOGIN_REDIRECT_URL = '/dashboard/'
+LOGIN_URL = '/auth/login/'
+LOGOUT_REDIRECT_URL = '/'
+
+AUTHENTICATION_BACKENDS = [
+    'accounts.backends.RoleBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+
+
+JAZZMIN_SETTINGS = {
+    'site_title': 'GGH System Admin',
+    'site_header': 'GGH System',
+    'site_brand': 'GGH System',
+    'welcome_sign': 'Welcome to the GGH System Administration',
+    'search_model': ['accounts.User'],
+    'show_sidebar': True,
+    'navigation_expanded': True,
+    'custom_css': None,
+    'custom_js': None,
+    'show_ui_builder': False,
+}
+
+JAZZMIN_UI_TWEAKS = {
+    'navbar': 'navbar-white navbar-light',
+    'theme': 'default',
+    'sidebar': 'sidebar-dark-primary',
+    'sidebar_nav_child_indent': True,
+    'sidebar_nav_compact_style': False,
 }

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}{% if object %}Edit Role{% else %}Add Role{% endif %}{% endblock %}
+{% block page_title %}{% if object %}Edit Role: {{ object.name }}{% else %}Add Role{% endif %}{% endblock %}
+{% block content %}
+<div class="card card-primary">
+  <div class="card-header"><h3 class="card-title">Role Details</h3></div>
+  <form method="post">{% csrf_token %}
+    <div class="card-body">
+      {{ form.as_p }}
+    </div>
+    <div class="card-footer">
+      <button type="submit" class="btn btn-primary">Save</button>
+      <a href="{% url 'accounts:role_list' %}" class="btn btn-default">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

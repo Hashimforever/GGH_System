@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}Financial Report{% endblock %}
+{% block page_title %}Financial Summary Report{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="info-box bg-success">
+            <span class="info-box-icon"><i class="fas fa-plus"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Total Income</span>
+                <span class="info-box-number">${{ total_income|floatformat:2 }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="info-box bg-danger">
+            <span class="info-box-icon"><i class="fas fa-minus"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Total Expenses</span>
+                <span class="info-box-number">${{ total_expense|floatformat:2 }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="info-box bg-info">
+            <span class="info-box-icon"><i class="fas fa-balance-scale"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Net Balance</span>
+                <span class="info-box-number">${{ balance|floatformat:2 }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Monthly Breakdown -->
+    <div class="col-md-6">
+        <div class="card card-primary">
+            <div class="card-header"><h3 class="card-title">Monthly Breakdown</h3></div>
+            <div class="card-body p-0 table-responsive">
+                <table class="table table-striped datatable table-sm">
+                    <thead><tr><th>Month</th><th>Income</th><th>Expense</th><th>Net</th></tr></thead>
+                    <tbody>
+                        {% for m in monthly_data %}
+                        <tr>
+                            <td>{{ m.month|date:"M Y" }}</td>
+                            <td class="text-success">${{ m.income|floatformat:2 }}</td>
+                            <td class="text-danger">${{ m.expense|floatformat:2 }}</td>
+                            <td><strong>${{ m.income|add:"-"|add:m.expense|floatformat:2 }}</strong></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- Annual Breakdown -->
+    <div class="col-md-6">
+        <div class="card card-info">
+            <div class="card-header"><h3 class="card-title">Annual Breakdown</h3></div>
+            <div class="card-body p-0 table-responsive">
+                <table class="table table-striped datatable table-sm">
+                    <thead><tr><th>Year</th><th>Income</th><th>Expense</th><th>Net</th></tr></thead>
+                    <tbody>
+                        {% for a in annual_data %}
+                        <tr>
+                            <td>{{ a.year|date:"Y" }}</td>
+                            <td class="text-success">${{ a.income|floatformat:2 }}</td>
+                            <td class="text-danger">${{ a.expense|floatformat:2 }}</td>
+                            <td><strong>${{ a.income|add:"-"|add:a.expense|floatformat:2 }}</strong></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Transaction Ledger</h3>
+            </div>
+            <div class="card-body p-0 table-responsive">
+                <table class="table table-striped table-bordered datatable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in transactions %}
+                        <tr>
+                            <td>{{ t.transaction_date|date:"Y-m-d H:i" }}</td>
+                            <td>{{ t.get_transaction_type_display }}</td>
+                            <td>{{ t.description }}</td>
+                            <td class="{% if 'income' in t.transaction_type %}text-success{% else %}text-danger{% endif %}">
+                                {% if 'income' in t.transaction_type %}+{% else %}-{% endif %}${{ t.amount|floatformat:2 }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

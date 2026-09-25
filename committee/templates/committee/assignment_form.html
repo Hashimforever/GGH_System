@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}{% if object %}Edit Assignment{% else %}Add Assignment{% endif %}{% endblock %}
+{% block page_title %}{% if object %}Edit Assignment{% else %}Add Assignment{% endif %}{% endblock %}
+{% block content %}
+<div class="card card-primary">
+  <form method="post">{% csrf_token %}
+    <div class="card-body">{{ form.as_p }}</div>
+    <div class="card-footer">
+      <button type="submit" class="btn btn-primary">Save</button>
+      <a href="{% url 'committee:assignment_list' %}" class="btn btn-default">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

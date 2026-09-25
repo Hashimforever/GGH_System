@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+
+{% block title %}System Settings{% endblock %}
+{% block page_title %}System Settings{% endblock %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+
+    {% if messages %}
+        {% for msg in messages %}
+            <div class="alert alert-{{ msg.tags }} alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                {{ msg }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- ===================== Association Info ===================== -->
+    <div class="card card-primary card-outline">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-building mr-2"></i>Association Information</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label>Association Name</label>
+                    {{ form.association_name }}
+                </div>
+                <div class="col-md-6 form-group">
+                    <label>Tagline / Motto</label>
+                    {{ form.association_tagline }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 form-group">
+                    <label>Email</label>
+                    {{ form.association_email }}
+                </div>
+                <div class="col-md-4 form-group">
+                    <label>Phone</label>
+                    {{ form.association_phone }}
+                </div>
+                <div class="col-md-4 form-group">
+                    <label>Currency Symbol</label>
+                    {{ form.currency_symbol }}
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Address</label>
+                {{ form.association_address }}
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== Financial Settings ===================== -->
+    <div class="card card-success card-outline">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-dollar-sign mr-2"></i>Financial Defaults</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 form-group">
+                    <label>{{ form.registration_fee.label }}</label>
+                    {{ form.registration_fee }}
+                    <small class="form-text text-muted">{{ form.registration_fee.help_text }}</small>
+                </div>
+                <div class="col-md-4 form-group">
+                    <label>{{ form.default_monthly_contribution.label }}</label>
+                    {{ form.default_monthly_contribution }}
+                    <small class="form-text text-muted">{{ form.default_monthly_contribution.help_text }}</small>
+                </div>
+                <div class="col-md-4 form-group">
+                    <label>{{ form.late_payment_penalty.label }}</label>
+                    {{ form.late_payment_penalty }}
+                    <small class="form-text text-muted">{{ form.late_payment_penalty.help_text }}</small>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 form-group">
+                    <label>{{ form.loan_interest_rate.label }} (%)</label>
+                    {{ form.loan_interest_rate }}
+                    <small class="form-text text-muted">{{ form.loan_interest_rate.help_text }}</small>
+                </div>
+                <div class="col-md-4 form-group">
+                    <label>{{ form.max_loan_multiplier.label }}</label>
+                    {{ form.max_loan_multiplier }}
+                    <small class="form-text text-muted">{{ form.max_loan_multiplier.help_text }}</small>
+                </div>
+                <div class="col-md-4 form-group">
+                    <label>{{ form.fiscal_year_start_month.label }}</label>
+                    {{ form.fiscal_year_start_month }}
+                </div>
+            </div>
+
+            <!-- Per-Month Overrides -->
+            <hr>
+            <h5 class="mb-1">
+                Monthly Contribution Amounts
+                <small class="text-muted ml-2" style="font-size: 0.8rem;">
+                    (Leave blank to use the default: <strong id="default_preview">{{ settings.default_monthly_contribution }}</strong>)
+                </small>
+            </h5>
+            <p class="text-muted small">Set a specific amount for any month to override the default. Annual total per member: <strong id="annual_total">{{ settings.get_annual_expected }}</strong></p>
+
+            <div class="row" id="month_grid">
+                {% for month_field in form %}
+                    {% if month_field.name|slice:"-7:" == '_amount' %}
+                    <div class="col-md-2 col-sm-4 col-6 form-group text-center">
+                        <label>{{ month_field.label }}</label>
+                        {{ month_field }}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== Behavioural Settings ===================== -->
+    <div class="card card-info card-outline">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-cogs mr-2"></i>Behaviour & Rules</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="custom-control custom-switch mb-3">
+                        {{ form.enable_late_penalty }}
+                        <label class="custom-control-label" for="{{ form.enable_late_penalty.id_for_label }}">
+                            Enable Late Payment Penalty
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="custom-control custom-switch mb-3">
+                        {{ form.allow_partial_payments }}
+                        <label class="custom-control-label" for="{{ form.allow_partial_payments.id_for_label }}">
+                            Allow Partial Payments
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="custom-control custom-switch mb-3">
+                        {{ form.auto_generate_expected_on_member_create }}
+                        <label class="custom-control-label" for="{{ form.auto_generate_expected_on_member_create.id_for_label }}">
+                            Auto-Generate Expected Payments on New Member
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Annual Summary Card -->
+    <div class="card card-warning card-outline">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-calculator mr-2"></i>Calculated Summary (per member)</h3>
+        </div>
+        <div class="card-body">
+            <table class="table table-sm table-bordered">
+                <thead>
+                    <tr>
+                        {% for name, amount in settings.get_month_summary %}
+                        <th class="text-center">{{ name|slice:":3" }}</th>
+                        {% endfor %}
+                        <th class="text-center table-warning">Annual</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        {% for name, amount in settings.get_month_summary %}
+                        <td class="text-center">{{ settings.currency_symbol }}{{ amount }}</td>
+                        {% endfor %}
+                        <td class="text-center table-warning font-weight-bold">{{ settings.currency_symbol }}{{ settings.get_annual_expected }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <small class="text-muted">This table updates after you save the settings.</small>
+        </div>
+    </div>
+
+    <div class="text-right mb-4">
+        <button type="submit" class="btn btn-primary btn-lg">
+            <i class="fas fa-save mr-1"></i> Save All Settings
+        </button>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Sync the "default" preview text
+    $('#id_default_monthly_contribution').on('input', function() {
+        $('#default_preview').text($(this).val() || '0.00');
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}GGH Documents{% endblock %}
+{% block page_title %}GGH Documents{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">All Documents</h3>
+                <div class="card-tools">
+                    <a href="{% url 'documents:document_create' %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-upload"></i> Upload New Document
+                    </a>
+                </div>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body table-responsive p-0">
+                <table class="table table-hover text-nowrap datatable">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Type</th>
+                            <th>Uploaded By</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for document in documents %}
+                        <tr>
+                            <td>{{ document.title }}</td>
+                            <td>{{ document.description|truncatewords:10 }}</td>
+                            <td>
+                                {% if document.get_file_extension == '.pdf' %}
+                                    <i class="fas fa-file-pdf text-danger"></i> PDF
+                                {% elif document.get_file_extension in '.xls,.xlsx' %}
+                                    <i class="fas fa-file-excel text-success"></i> Excel
+                                {% elif document.get_file_extension in '.doc,.docx' %}
+                                    <i class="fas fa-file-word text-primary"></i> Word
+                                {% else %}
+                                    <i class="fas fa-file text-secondary"></i> {{ document.get_file_extension|upper }}
+                                {% endif %}
+                            </td>
+                            <td>{{ document.uploaded_by.username }}</td>
+                            <td>{{ document.uploaded_at|date:"M d, Y H:i" }}</td>
+                            <td>
+                                <a href="{% url 'documents:document_download' document.pk %}" class="btn btn-success btn-sm">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                                <a href="{% url 'documents:document_update' document.pk %}" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <a href="{% url 'documents:document_delete' document.pk %}" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i> Delete
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+    </div>
+</div>
+{% endblock %}

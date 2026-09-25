@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Manage Roles{% endblock %}
+{% block page_title %}Manage Roles & Permissions{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Roles</h3>
+    <div class="card-tools">
+      <a href="{% url 'accounts:role_create' %}" class="btn btn-sm btn-primary">
+        <i class="fas fa-plus"></i> Add Role
+      </a>
+    </div>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-striped datatable">
+      <thead><tr><th>Name</th><th>Description</th><th>Users</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for r in roles %}
+        <tr>
+          <td>{{ r.name }}</td>
+          <td>{{ r.description }}</td>
+          <td>{{ r.users.count }}</td>
+          <td>
+            <a href="{% url 'accounts:role_update' r.pk %}" class="btn btn-xs btn-primary"><i class="fas fa-edit"></i></a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Committee Assignments{% endblock %}
+{% block page_title %}Committee Assignments{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Assignments</h3>
+    <div class="card-tools">
+      <a href="{% url 'committee:assignment_create' %}" class="btn btn-sm btn-primary">
+        <i class="fas fa-plus"></i> Add Assignment
+      </a>
+      <a href="{% url 'committee:position_list' %}" class="btn btn-sm btn-info">Manage Positions</a>
+    </div>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-striped datatable">
+      <thead><tr><th>Member</th><th>Position</th><th>Start Date</th><th>End Date</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for a in assignments %}
+        <tr>
+          <td>{{ a.member }}</td>
+          <td>{{ a.position }}</td>
+          <td>{{ a.start_date }}</td>
+          <td>{{ a.end_date|default:"Present" }}</td>
+          <td>
+            <a href="{% url 'committee:assignment_update' a.pk %}" class="btn btn-xs btn-primary"><i class="fas fa-edit"></i></a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

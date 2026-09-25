@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Committee Positions{% endblock %}
+{% block page_title %}Committee Positions{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Positions</h3>
+    <div class="card-tools">
+      <a href="{% url 'committee:position_create' %}" class="btn btn-sm btn-primary">
+        <i class="fas fa-plus"></i> Add Position
+      </a>
+    </div>
+  </div>
+  <div class="card-body p-0">
+    <table class="table table-striped datatable">
+      <thead><tr><th>Title</th><th>Description</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for p in positions %}
+        <tr>
+          <td>{{ p.title }}</td>
+          <td>{{ p.description }}</td>
+          <td>
+            <a href="{% url 'committee:position_update' p.pk %}" class="btn btn-xs btn-primary"><i class="fas fa-edit"></i></a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

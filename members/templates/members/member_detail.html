@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block title %}Member Profile{% endblock %}
+{% block page_title %}Member Profile: {{ member.member_id }}{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col-12">
+        <a href="{% url 'members:member_list' %}" class="btn btn-secondary btn-sm">
+            <i class="fas fa-arrow-left"></i> Back to Members
+        </a>
+        <a href="{% url 'members:member_update' member.pk %}" class="btn btn-warning btn-sm">
+            <i class="fas fa-edit"></i> Edit Member
+        </a>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-3">
+        <!-- Profile Image -->
+        <div class="card card-primary card-outline">
+            <div class="card-body box-profile">
+                <div class="text-center">
+                    {% if member.photo %}
+                        <img class="profile-user-img img-fluid img-circle"
+                             src="{{ member.photo.url }}"
+                             alt="User profile picture">
+                    {% else %}
+                        <img class="profile-user-img img-fluid img-circle"
+                             src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/img/avatar.png"
+                             alt="User profile picture">
+                    {% endif %}
+                </div>
+
+                <h3 class="profile-username text-center">{{ member.first_name }} {{ member.last_name }}</h3>
+
+                <p class="text-muted text-center">{{ member.occupation|default:"N/A" }}</p>
+
+                <ul class="list-group list-group-unbordered mb-3">
+                    <li class="list-group-item">
+                        <b>Status</b> <a class="float-right">{{ member.get_status_display }}</a>
+                    </li>
+                    <li class="list-group-item">
+                        <b>Join Date</b> <a class="float-right">{{ member.date_of_membership|date:"M d, Y" }}</a>
+                    </li>
+                    <li class="list-group-item">
+                        <b>Phone</b> <a class="float-right">{{ member.phone_number|default:"N/A" }}</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+    </div>
+    <!-- /.col -->
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header p-2">
+                <ul class="nav nav-pills">
+                    <li class="nav-item"><a class="nav-link active" href="#about" data-toggle="tab">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#financial" data-toggle="tab">Financial History</a></li>
+                </ul>
+            </div><!-- /.card-header -->
+            <div class="card-body">
+                <div class="tab-content">
+                    <div class="active tab-pane" id="about">
+                        <strong><i class="fas fa-book mr-1"></i> Contact Info</strong>
+                        <p class="text-muted">
+                            Email: {{ member.email|default:"N/A" }}<br>
+                            Address: {{ member.residential_address|default:"N/A" }}
+                        </p>
+                        <hr>
+                        <strong><i class="fas fa-map-marker-alt mr-1"></i> Personal</strong>
+                        <p class="text-muted">
+                            Gender: {{ member.get_gender_display|default:"N/A" }}<br>
+                            DOB: {{ member.date_of_birth|date:"M d, Y"|default:"N/A" }}
+                        </p>
+                        <hr>
+                        <strong><i class="fas fa-ring mr-1"></i> Family & Marital Status</strong>
+                        <p class="text-muted">
+                            Status: {{ member.get_marital_status_display }}<br>
+                            {% if member.marital_status == 'married' %}
+                                Spouse: {{ member.spouse_name|default:"N/A" }} ({{ member.spouse_phone|default:"N/A" }})<br>
+                                Husband's Father: {% if member.husband_father_alive %}Alive{% else %}Deceased{% endif %} |
+                                Husband's Mother: {% if member.husband_mother_alive %}Alive{% else %}Deceased{% endif %}<br>
+                                Wife's Father: {% if member.wife_father_alive %}Alive{% else %}Deceased{% endif %} |
+                                Wife's Mother: {% if member.wife_mother_alive %}Alive{% else %}Deceased{% endif %}
+                            {% endif %}
+                        </p>
+                        <hr>
+                        <strong><i class="fas fa-child mr-1"></i> Children</strong>
+                        {% if member.children.all %}
+                            <ul class="text-muted">
+                            {% for child in member.children.all %}
+                                <li>{{ child.name }} (DOB: {{ child.date_of_birth|date:"M d, Y"|default:"N/A" }})</li>
+                            {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted">None registered.</p>
+                        {% endif %}
+                        <hr>
+                        <strong><i class="fas fa-users mr-1"></i> Other Family Members</strong>
+                        {% if member.other_family_members.all %}
+                            <ul class="text-muted">
+                            {% for fam in member.other_family_members.all %}
+                                <li>{{ fam.name }} ({{ fam.relation }})</li>
+                            {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted">None registered.</p>
+                        {% endif %}
+                        <hr>
+                        <strong><i class="fas fa-notes-medical mr-1"></i> Emergency Contact</strong>
+                        <p class="text-muted">
+                            Name: {{ member.emergency_contact_name|default:"N/A" }}<br>
+                            Phone: {{ member.emergency_contact_phone|default:"N/A" }}
+                        </p>
+                    </div>
+                    <!-- /.tab-pane -->
+                    <div class="tab-pane" id="financial">
+                        <h5>Contributions</h5>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Period</th>
+                                    <th>Expected</th>
+                                    <th>Actual Paid</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for exp in expected_payments %}
+                                <tr>
+                                    <td>{{ exp.period }}</td>
+                                    <td>${{ exp.amount }}</td>
+                                    <td>
+                                        <!-- Note: this is a simplistic mapping, ideally we join them -->
+                                        {% for act in actual_payments %}
+                                            {% if act.period == exp.period %}
+                                                ${{ act.amount_paid }} ({{ act.get_status_display }})
+                                            {% endif %}
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        
+                        <hr>
+                        <h5>Loans</h5>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Applied</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for loan in loans %}
+                                <tr>
+                                    <td>${{ loan.amount }}</td>
+                                    <td>{{ loan.get_status_display }}</td>
+                                    <td>{{ loan.application_date }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="3">No loans found.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.tab-pane -->
+                </div>
+                <!-- /.tab-content -->
+            </div><!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+    </div>
+    <!-- /.col -->
+</div>
+<!-- /.row -->
+{% endblock %}

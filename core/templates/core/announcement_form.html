@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-8 mx-auto">
+    <div class="card card-primary">
+      <div class="card-header"><h3 class="card-title">Announcement Details</h3></div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="card-body">
+          <div class="form-group">
+            <label>Title *</label>{{ form.title }}
+          </div>
+          <div class="form-group">
+            <label>Content *</label>{{ form.body }}
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="custom-control custom-switch mt-2">
+                {{ form.is_active }}
+                <label class="custom-control-label" for="{{ form.is_active.id_for_label }}">Visible to public</label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="custom-control custom-switch mt-2">
+                {{ form.pinned }}
+                <label class="custom-control-label" for="{{ form.pinned.id_for_label }}">Pin at top</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <button type="submit" class="btn btn-primary">Save Announcement</button>
+          <a href="{% url 'core:manage_homepage' %}" class="btn btn-default float-right">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}{% if object %}Edit User{% else %}Add User{% endif %}{% endblock %}
+{% block page_title %}{% if object %}Edit User: {{ object.username }}{% else %}Add User{% endif %}{% endblock %}
+{% block content %}
+<div class="card card-primary">
+  <div class="card-header"><h3 class="card-title">User Details</h3></div>
+  <form method="post">{% csrf_token %}
+    <div class="card-body">
+      {{ form.as_p }}
+    </div>
+    <div class="card-footer">
+      <button type="submit" class="btn btn-primary">Save</button>
+      <a href="{% url 'accounts:user_list' %}" class="btn btn-default">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

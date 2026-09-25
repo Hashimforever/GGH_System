@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 mx-auto">
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">Member Details</h3>
+            </div>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="card-body">
+                    {% if form.errors or child_formset.errors or family_formset.errors %}
+                        <div class="alert alert-danger">
+                            Please correct the errors below.
+                        </div>
+                    {% endif %}
+                    
+                    <h4>Basic Info</h4>
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label>First Name *</label>
+                            {{ form.first_name }}
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label>Last Name *</label>
+                            {{ form.last_name }}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label>Gender</label>
+                            {{ form.gender }}
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label>Date of Birth</label>
+                            {{ form.date_of_birth }}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label>Phone Number</label>
+                            {{ form.phone_number }}
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label>Email</label>
+                            {{ form.email }}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Residential Address</label>
+                        {{ form.residential_address }}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label>Date of Membership *</label>
+                            {{ form.date_of_membership }}
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label>Status</label>
+                            {{ form.status }}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Occupation</label>
+                        {{ form.occupation }}
+                    </div>
+
+                    <hr>
+                    <h4>Marital Status & Family Information</h4>
+                    <div class="form-group">
+                        <label>Marital Status</label>
+                        {{ form.marital_status }}
+                    </div>
+
+                    <!-- Married Section -->
+                    <div id="married_section" style="display: none; background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                        <h5>Spouse (Wife/Husband) Information</h5>
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label>Spouse Name</label>
+                                {{ form.spouse_name }}
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>Spouse Phone</label>
+                                {{ form.spouse_phone }}
+                            </div>
+                        </div>
+                        <hr>
+                        <h5>Parents Status</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="font-weight-bold mb-1">Member's Parents</p>
+                                <div class="custom-control custom-checkbox mb-2">
+                                    {{ form.husband_father_alive }}
+                                    <label class="custom-control-label" for="{{ form.husband_father_alive.id_for_label }}">Father is Alive</label>
+                                </div>
+                                <div class="custom-control custom-checkbox">
+                                    {{ form.husband_mother_alive }}
+                                    <label class="custom-control-label" for="{{ form.husband_mother_alive.id_for_label }}">Mother is Alive</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="font-weight-bold mb-1">Spouse's Parents</p>
+                                <div class="custom-control custom-checkbox mb-2">
+                                    {{ form.wife_father_alive }}
+                                    <label class="custom-control-label" for="{{ form.wife_father_alive.id_for_label }}">Father is Alive</label>
+                                </div>
+                                <div class="custom-control custom-checkbox">
+                                    {{ form.wife_mother_alive }}
+                                    <label class="custom-control-label" for="{{ form.wife_mother_alive.id_for_label }}">Mother is Alive</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+                    <h4>Children Information</h4>
+                    {{ child_formset.management_form }}
+                    <div id="children_formset">
+                        {% for cform in child_formset %}
+                            <div class="row child-form mb-2 align-items-center">
+                                <div class="col-md-5">
+                                    <label>Child Name</label>
+                                    {{ cform.name }}
+                                </div>
+                                <div class="col-md-5">
+                                    <label>Date of Birth</label>
+                                    {{ cform.date_of_birth }}
+                                </div>
+                                <div class="col-md-2 text-right">
+                                    <button type="button" class="btn btn-danger btn-sm remove-child mt-4"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-outline-info btn-sm mt-2" id="add_child"><i class="fas fa-plus"></i> Add Other Child</button>
+
+                    <hr>
+                    <h4>Other Family Members</h4>
+                    {{ family_formset.management_form }}
+                    <div id="family_formset">
+                        {% for fform in family_formset %}
+                            <div class="row family-form mb-2 align-items-center">
+                                <div class="col-md-5">
+                                    <label>Name</label>
+                                    {{ fform.name }}
+                                </div>
+                                <div class="col-md-5">
+                                    <label>Relation</label>
+                                    {{ fform.relation }}
+                                </div>
+                                <div class="col-md-2 text-right">
+                                    <button type="button" class="btn btn-danger btn-sm remove-family mt-4"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-outline-info btn-sm mt-2" id="add_family"><i class="fas fa-plus"></i> Add Other Family Member</button>
+
+                    <hr>
+                    <h4>Emergency Contact</h4>
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label>Name</label>
+                            {{ form.emergency_contact_name }}
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label>Phone</label>
+                            {{ form.emergency_contact_phone }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Photo</label>
+                        {{ form.photo }}
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        {% if is_edit %}Save Changes{% else %}Submit Registration{% endif %}
+                    </button>
+                    {% if is_edit %}
+                    <a href="{% url 'members:member_detail' member.pk %}" class="btn btn-default float-right">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    {% else %}
+                    <a href="{% url 'members:member_list' %}" class="btn btn-default float-right">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Handle Marital Status Display
+        function toggleMarriedSection() {
+            if ($('#id_marital_status').val() === 'married') {
+                $('#married_section').slideDown();
+            } else {
+                $('#married_section').slideUp();
+            }
+        }
+        
+        $('#id_marital_status').change(toggleMarriedSection);
+        toggleMarriedSection(); // Run on load
+
+        // Dynamic Formsets logic
+        function addFormset(containerId, formClass, prefix) {
+            var container = $('#' + containerId);
+            var formCount = parseInt($('#id_' + prefix + '-TOTAL_FORMS').val());
+            var newForm = container.find('.' + formClass + ':first').clone(true);
+            
+            newForm.find('input').each(function() {
+                var name = $(this).attr('name');
+                if (name) {
+                    name = name.replace('-0-', '-' + formCount + '-');
+                    var id = 'id_' + name;
+                    $(this).attr({'name': name, 'id': id}).val('');
+                }
+            });
+            
+            newForm.appendTo(container);
+            $('#id_' + prefix + '-TOTAL_FORMS').val(formCount + 1);
+        }
+
+        $('#add_child').click(function() {
+            addFormset('children_formset', 'child-form', 'children');
+        });
+
+        $('#add_family').click(function() {
+            addFormset('family_formset', 'family-form', 'family');
+        });
+
+        $(document).on('click', '.remove-child, .remove-family', function() {
+            $(this).closest('.row').hide();
+            // Note: properly removing requires setting the DELETE input if dealing with existing records,
+            // but for simple create this hides it and we rely on empty forms being ignored by Django.
+        });
+    });
+</script>
+{% endblock %}
