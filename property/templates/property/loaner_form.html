@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <form method="post">{% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <!-- ═══════════ LOANER DETAILS ═══════════ -->
+      <h5 class="mb-3"><i class="fas fa-user"></i> Loaner Details</h5>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label>Full name <span class="text-danger">*</span></label>
+          {{ form.full_name }}
+          {% if form.full_name.errors %}<small class="text-danger">{{ form.full_name.errors }}</small>{% endif %}
+        </div>
+        <div class="col-md-6 mb-3">
+          <label>Phone <span class="text-danger">*</span></label>
+          {{ form.phone }}
+          {% if form.phone.errors %}<small class="text-danger">{{ form.phone.errors }}</small>{% endif %}
+        </div>
+        <div class="col-md-6 mb-3">
+          <label>Email</label>
+          {{ form.email }}
+        </div>
+        <div class="col-md-6 mb-3">
+          <label>ID number</label>
+          {{ form.id_number }}
+        </div>
+        <div class="col-md-6 mb-3">
+          <label>Address</label>
+          {{ form.address }}
+        </div>
+        <div class="col-md-6 mb-3 d-flex align-items-center">
+          <div class="form-check mt-3">
+            {{ form.is_member }}
+            <label class="form-check-label ml-1">Is a registered community member?</label>
+          </div>
+        </div>
+        <div class="col-md-12 mb-3">
+          <label>Notes</label>
+          {{ form.notes }}
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <!-- ═══════════ MATERIAL TO LOAN (OPTIONAL) ═══════════ -->
+      <h5 class="mb-3">
+        <i class="fas fa-boxes"></i> Material to Loan
+        <small class="text-muted">(optional — fill in to record a loan right now)</small>
+      </h5>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label>Material</label>
+          {{ form.property_item }}
+          {% if form.property_item.errors %}<small class="text-danger">{{ form.property_item.errors }}</small>{% endif %}
+        </div>
+        <div class="col-md-6 mb-3">
+          <label>Quantity</label>
+          {{ form.quantity }}
+          {% if form.quantity.errors %}<small class="text-danger">{{ form.quantity.errors }}</small>{% endif %}
+        </div>
+        <div class="col-md-6 mb-3">
+          <label>Loan date</label>
+          {{ form.loan_date }}
+          {% if form.loan_date.errors %}<small class="text-danger">{{ form.loan_date.errors }}</small>{% endif %}
+        </div>
+        <div class="col-md-6 mb-3">
+          <label>Expected return date</label>
+          {{ form.expected_return_date }}
+          {% if form.expected_return_date.errors %}<small class="text-danger">{{ form.expected_return_date.errors }}</small>{% endif %}
+        </div>
+        <div class="col-md-6 mb-3">
+          <label>Condition on loan</label>
+          {{ form.condition_on_loan }}
+        </div>
+        <div class="col-md-6 mb-3">
+          <label>Loan code <small class="text-muted">(auto if blank)</small></label>
+          {{ form.loan_code }}
+        </div>
+        <div class="col-md-12 mb-3">
+          <label>Purpose</label>
+          {{ form.purpose }}
+        </div>
+      </div>
+
+      <button class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
+      <a href="{% url 'property:loaner_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-header"><div class="container-fluid"><h1>Loan {{ loan.loan_code }}</h1></div></div>
+<section class="content"><div class="container-fluid">
+  <div class="card"><div class="card-body">
+    <table class="table table-bordered">
+      <tr><th>Item</th><td>{{ loan.property_item.name }} ({{ loan.property_item.code }})</td></tr>
+      <tr><th>Loaner</th><td><a href="{% url 'property:loaner_detail' loan.loaner.pk %}">{{ loan.loaner.full_name }}</a></td></tr>
+      <tr><th>Quantity</th><td>{{ loan.quantity }}</td></tr>
+      <tr><th>Loan Date</th><td>{{ loan.loan_date }}</td></tr>
+      <tr><th>Expected Return</th><td>{{ loan.expected_return_date }}</td></tr>
+      <tr><th>Actual Return</th><td>{{ loan.actual_return_date|default:"-" }}</td></tr>
+      <tr><th>Status</th><td>{{ loan.get_status_display }}</td></tr>
+      <tr><th>Purpose</th><td>{{ loan.purpose|default:"-" }}</td></tr>
+      <tr><th>Condition on Loan</th><td>{{ loan.condition_on_loan|default:"-" }}</td></tr>
+      <tr><th>Condition on Return</th><td>{{ loan.condition_on_return|default:"-" }}</td></tr>
+      <tr><th>Handled By</th><td>{{ loan.handled_by|default:"-" }}</td></tr>
+      <tr><th>Notes</th><td>{{ loan.notes|default:"-" }}</td></tr>
+    </table>
+    {% if loan.status != 'returned' %}
+      <a href="{% url 'property:loan_return' loan.pk %}" class="btn btn-success"><i class="fas fa-undo"></i> Mark Returned</a>
+    {% endif %}
+    <a href="{% url 'property:loan_list' %}" class="btn btn-secondary">Back</a>
+  </div></div>
+</div></section>
+{% endblock %}

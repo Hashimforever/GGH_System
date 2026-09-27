@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ reg.full_name }}{% endblock %}
+{% block page_title %}Registration: {{ reg.full_name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title">Applicant Details</h3></div>
+      <div class="card-body">
+        <table class="table table-bordered">
+          <tr><th width="30%">Full name</th><td>{{ reg.full_name }}</td></tr>
+          <tr><th>Gender</th><td>{{ reg.get_gender_display|default:"-" }}</td></tr>
+          <tr><th>Date of birth</th><td>{{ reg.date_of_birth|default:"-" }}</td></tr>
+          <tr><th>Phone</th><td>{{ reg.phone_number }}</td></tr>
+          <tr><th>Email</th><td>{{ reg.email|default:"-" }}</td></tr>
+          <tr><th>Address</th><td>{{ reg.residential_address|default:"-" }}</td></tr>
+          <tr><th>Occupation</th><td>{{ reg.occupation|default:"-" }}</td></tr>
+          <tr><th>Marital status</th><td>{{ reg.get_marital_status_display }}</td></tr>
+          <tr><th>Submitted</th><td>{{ reg.submitted_at|date:"M d, Y H:i" }}</td></tr>
+          <tr><th>Status</th><td>{{ reg.get_status_display }}</td></tr>
+          {% if reg.reviewed_by %}
+          <tr><th>Reviewed by</th><td>{{ reg.reviewed_by }} on {{ reg.reviewed_at|date:"M d, Y H:i" }}</td></tr>
+          {% endif %}
+          {% if reg.rejection_reason %}
+          <tr><th>Rejection reason</th><td class="text-danger">{{ reg.rejection_reason }}</td></tr>
+          {% endif %}
+          {% if reg.admin_notes %}
+          <tr><th>Admin notes</th><td>{{ reg.admin_notes }}</td></tr>
+          {% endif %}
+        </table>
+
+        {% if reg.status == 'pending' %}
+        <a href="{% url 'members:registration_approve' reg.pk %}" class="btn btn-success">
+          <i class="fas fa-check"></i> Approve
+        </a>
+        <a href="{% url 'members:registration_reject' reg.pk %}" class="btn btn-danger">
+          <i class="fas fa-times"></i> Reject
+        </a>
+        {% endif %}
+        <a href="{% url 'members:registration_requests' %}" class="btn btn-secondary">Back</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

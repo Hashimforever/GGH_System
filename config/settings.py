@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'reports',
     'audit',
     'documents',
+    'property',   # ⭐ NEW: Property Records app
 ]
 
 AUTH_USER_MODEL = 'accounts.User'

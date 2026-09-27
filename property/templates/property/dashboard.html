@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-header">
+  <div class="container-fluid">
+    <h1 class="m-0">Property Records Dashboard</h1>
+  </div>
+</div>
+
+<section class="content">
+  <div class="container-fluid">
+
+    <div class="row">
+      <div class="col-lg-3 col-6">
+        <div class="small-box bg-info">
+          <div class="inner"><h3>{{ total_items }}</h3><p>Total Items</p></div>
+          <div class="icon"><i class="fas fa-boxes"></i></div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-6">
+        <div class="small-box bg-success">
+          <div class="inner"><h3>{{ total_available }}</h3><p>Available</p></div>
+          <div class="icon"><i class="fas fa-check-circle"></i></div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-6">
+        <div class="small-box bg-warning">
+          <div class="inner"><h3>{{ active_loans }}</h3><p>Active Loans</p></div>
+          <div class="icon"><i class="fas fa-hand-holding"></i></div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-6">
+        <div class="small-box bg-danger">
+          <div class="inner"><h3>{{ overdue_loans }}</h3><p>Overdue</p></div>
+          <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Recent Loans</h3></div>
+          <div class="card-body p-0">
+            <table class="table table-striped">
+              <thead>
+                <tr><th>Code</th><th>Item</th><th>Loaner</th><th>Qty</th><th>Due</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                {% for l in recent_loans %}
+                <tr>
+                  <td><a href="{% url 'property:loan_detail' l.pk %}">{{ l.loan_code }}</a></td>
+                  <td>{{ l.property_item.name }}</td>
+                  <td>{{ l.loaner.full_name }}</td>
+                  <td>{{ l.quantity }}</td>
+                  <td>{{ l.expected_return_date }}</td>
+                  <td>
+                    {% if l.status == 'overdue' %}<span class="badge badge-danger">Overdue</span>
+                    {% elif l.status == 'returned' %}<span class="badge badge-success">Returned</span>
+                    {% else %}<span class="badge badge-info">{{ l.get_status_display }}</span>{% endif %}
+                  </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center text-muted">No loans yet.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Low Stock Alerts</h3></div>
+          <div class="card-body p-0">
+            <ul class="list-group list-group-flush">
+              {% for p in low_stock %}
+              <li class="list-group-item d-flex justify-content-between">
+                {{ p.name }} <span class="badge badge-warning">{{ p.quantity_available }} left</span>
+              </li>
+              {% empty %}
+              <li class="list-group-item text-muted">All items well stocked.</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+
+        <a href="{% url 'property:property_create' %}" class="btn btn-primary btn-block mb-2">
+          <i class="fas fa-plus"></i> Add Property
+        </a>
+        <a href="{% url 'property:loan_create' %}" class="btn btn-success btn-block mb-2">
+          <i class="fas fa-hand-holding"></i> New Loan
+        </a>
+        <a href="{% url 'property:loaner_create' %}" class="btn btn-info btn-block">
+          <i class="fas fa-user-plus"></i> Add Loaner
+        </a>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}
