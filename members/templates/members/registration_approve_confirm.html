@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Approve Registration{% endblock %}
+{% block page_title %}Approve Registration{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <p>Are you sure you want to approve <strong>{{ reg.full_name }}</strong>?</p>
+    <p>This will:</p>
+    <ul>
+      <li>Create a new <strong>Member</strong> record with a new Member ID.</li>
+      {% if reg.email %}<li>Create a <strong>User account</strong> with username based on "{{ reg.email }}".</li>{% endif %}
+    </ul>
+    <form method="post">{% csrf_token %}
+      <button class="btn btn-success"><i class="fas fa-check"></i> Yes, Approve</button>
+      <a href="{% url 'members:registration_requests' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

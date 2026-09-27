@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-header"><div class="container-fluid"><h1>Material Loans</h1></div></div>
+<section class="content"><div class="container-fluid">
+  <div class="card">
+    <div class="card-header">
+      <form class="form-inline" method="get">
+        <input type="text" name="q" value="{{ q }}" class="form-control mr-2" placeholder="Search code / item / loaner">
+        <select name="status" class="form-control mr-2">
+          <option value="">All Status</option>
+          {% for val, label in status_choices %}
+            <option value="{{ val }}" {% if status == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <button class="btn btn-primary"><i class="fas fa-search"></i></button>
+        <a href="{% url 'property:loan_create' %}" class="btn btn-success ml-auto"><i class="fas fa-plus"></i> New Loan</a>
+      </form>
+    </div>
+    <div class="card-body p-0">
+      <table class="table table-hover">
+        <thead><tr><th>Code</th><th>Item</th><th>Loaner</th><th>Qty</th><th>Loan Date</th><th>Due Date</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+          {% for l in loans %}
+          <tr>
+            <td>{{ l.loan_code }}</td>
+            <td>{{ l.property_item.name }}</td>
+            <td>{{ l.loaner.full_name }}</td>
+            <td>{{ l.quantity }}</td>
+            <td>{{ l.loan_date }}</td>
+            <td>{{ l.expected_return_date }}</td>
+            <td>
+              {% if l.status == 'returned' %}<span class="badge badge-success">Returned</span>
+              {% elif l.status == 'overdue' %}<span class="badge badge-danger">Overdue</span>
+              {% elif l.status == 'active' %}<span class="badge badge-info">Active</span>
+              {% else %}<span class="badge badge-secondary">{{ l.get_status_display }}</span>{% endif %}
+            </td>
+            <td>
+              <a href="{% url 'property:loan_detail' l.pk %}" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>
+              {% if l.status != 'returned' %}
+              <a href="{% url 'property:loan_return' l.pk %}" class="btn btn-success btn-sm"><i class="fas fa-undo"></i></a>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}<tr><td colspan="8" class="text-center text-muted py-4">No loans recorded.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div></section>
+{% endblock %}

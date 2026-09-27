@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Reject Registration{% endblock %}
+{% block page_title %}Reject Registration{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-body">
+    <p>Rejecting the registration of <strong>{{ reg.full_name }}</strong>.</p>
+    <form method="post">{% csrf_token %}
+      <div class="mb-3">
+        <label>Reason for rejection</label>
+        {{ form.rejection_reason }}
+      </div>
+      <div class="mb-3">
+        <label>Internal admin notes</label>
+        {{ form.admin_notes }}
+      </div>
+      <button class="btn btn-danger"><i class="fas fa-times"></i> Confirm Rejection</button>
+      <a href="{% url 'members:registration_requests' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

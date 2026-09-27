@@ -1,7 +1,11 @@
 from django import forms
 from django.forms import inlineformset_factory
 from django.utils import timezone
-from .models import Member, MemberChild, OtherFamilyMember
+from .models import (
+    Member, MemberChild, OtherFamilyMember,
+    MemberRegistrationRequest,
+)
+
 
 class MemberForm(forms.ModelForm):
     class Meta:
@@ -94,3 +98,46 @@ OtherFamilyMemberFormSet = inlineformset_factory(
         'relation': forms.TextInput(attrs={'class': 'form-control'}),
     }
 )
+
+
+# ═══════════════════════════════════════════════════════════════
+#   NEW: Public member registration system
+# ═══════════════════════════════════════════════════════════════
+
+class MemberRegistrationForm(forms.ModelForm):
+    """Public registration form — no login required."""
+    class Meta:
+        model = MemberRegistrationRequest
+        fields = [
+            'first_name', 'last_name', 'gender', 'date_of_birth',
+            'phone_number', 'email', 'residential_address',
+            'occupation', 'marital_status',
+        ]
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First name'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last name'}),
+            'gender': forms.Select(attrs={'class': 'form-control'}),
+            'date_of_birth': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 0907773121'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'you@example.com'}),
+            'residential_address': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'occupation': forms.TextInput(attrs={'class': 'form-control'}),
+            'marital_status': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+    def clean_phone_number(self):
+        phone = self.cleaned_data.get('phone_number', '').strip()
+        if len(phone) < 7:
+            raise forms.ValidationError("Please enter a valid phone number.")
+        return phone
+
+
+class RegistrationReviewForm(forms.ModelForm):
+    """Used by admin to reject with a reason or add notes."""
+    class Meta:
+        model = MemberRegistrationRequest
+        fields = ['rejection_reason', 'admin_notes']
+        widgets = {
+            'rejection_reason': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'admin_notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }

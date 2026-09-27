@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-header"><div class="container-fluid"><h1>Property / Materials</h1></div></div>
+
+<section class="content">
+  <div class="container-fluid">
+    <div class="card">
+      <div class="card-header">
+        <form class="form-inline" method="get">
+          <input type="text" name="q" value="{{ q }}" class="form-control mr-2" placeholder="Search name or code">
+          <select name="status" class="form-control mr-2">
+            <option value="">All Status</option>
+            {% for val, label in status_choices %}
+              <option value="{{ val }}" {% if status == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          <select name="category" class="form-control mr-2">
+            <option value="">All Categories</option>
+            {% for c in categories %}
+              <option value="{{ c.id }}" {% if category_id == c.id|stringformat:'s' %}selected{% endif %}>{{ c.name }}</option>
+            {% endfor %}
+          </select>
+          <button class="btn btn-primary"><i class="fas fa-search"></i> Filter</button>
+          <a href="{% url 'property:property_create' %}" class="btn btn-success ml-auto">
+            <i class="fas fa-plus"></i> Add Property
+          </a>
+        </form>
+      </div>
+      <div class="card-body p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Code</th><th>Name</th><th>Category</th><th>Total</th>
+              <th>Available</th><th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in items %}
+            <tr>
+              <td>{{ item.code }}</td>
+              <td>{{ item.name }}</td>
+              <td>{{ item.category|default:"-" }}</td>
+              <td>{{ item.quantity_total }}</td>
+              <td>{{ item.quantity_available }}</td>
+              <td>
+                {% if item.status == 'available' %}<span class="badge badge-success">Available</span>
+                {% elif item.status == 'loaned' %}<span class="badge badge-info">Loaned</span>
+                {% elif item.status == 'damaged' %}<span class="badge badge-danger">Damaged</span>
+                {% elif item.status == 'maintenance' %}<span class="badge badge-warning">Maintenance</span>
+                {% else %}<span class="badge badge-secondary">{{ item.get_status_display }}</span>{% endif %}
+              </td>
+              <td>
+                <a href="{% url 'property:property_detail' item.pk %}" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>
+                <a href="{% url 'property:property_edit' item.pk %}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></a>
+                <a href="{% url 'property:property_delete' item.pk %}" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="text-center text-muted py-4">No property records found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

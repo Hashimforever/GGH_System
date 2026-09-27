@@ -32,6 +32,7 @@ urlpatterns = [
     path('loans/', include('loans.urls')),
     path('reports/', include('reports.urls')),
     path('documents/', include('documents.urls')),
+    path('property/', include('property.urls')),   # ⭐ NEW: Property Records app
     path('', include('core.urls')),
 ]
 

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-header"><div class="container-fluid"><h1>{{ loaner.full_name }}</h1></div></div>
+<section class="content"><div class="container-fluid">
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card"><div class="card-body">
+        <p><strong>Phone:</strong> {{ loaner.phone }}</p>
+        <p><strong>Email:</strong> {{ loaner.email|default:"-" }}</p>
+        <p><strong>ID Number:</strong> {{ loaner.id_number|default:"-" }}</p>
+        <p><strong>Address:</strong> {{ loaner.address|default:"-" }}</p>
+        <p><strong>Member:</strong> {% if loaner.is_member %}Yes{% else %}No{% endif %}</p>
+        <a href="{% url 'property:loaner_edit' loaner.pk %}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Edit</a>
+      </div></div>
+    </div>
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header"><h3 class="card-title">Loan History</h3></div>
+        <div class="card-body p-0">
+          <table class="table">
+            <thead><tr><th>Code</th><th>Item</th><th>Qty</th><th>Date</th><th>Due</th><th>Status</th></tr></thead>
+            <tbody>
+              {% for l in loans %}
+              <tr>
+                <td><a href="{% url 'property:loan_detail' l.pk %}">{{ l.loan_code }}</a></td>
+                <td>{{ l.property_item.name }}</td>
+                <td>{{ l.quantity }}</td>
+                <td>{{ l.loan_date }}</td>
+                <td>{{ l.expected_return_date }}</td>
+                <td>{{ l.get_status_display }}</td>
+              </tr>
+              {% empty %}<tr><td colspan="6" class="text-muted text-center">No loans yet.</td></tr>{% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div></section>
+{% endblock %}

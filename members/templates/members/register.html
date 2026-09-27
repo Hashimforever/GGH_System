@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block page_title %}Register as Member{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card card-primary">
+      <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-user-plus"></i> Membership Registration</h3>
+      </div>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="card-body">
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+          {% endif %}
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label>First name <span class="text-danger">*</span></label>
+              {{ form.first_name }}
+              {% if form.first_name.errors %}<small class="text-danger">{{ form.first_name.errors }}</small>{% endif %}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label>Last name <span class="text-danger">*</span></label>
+              {{ form.last_name }}
+              {% if form.last_name.errors %}<small class="text-danger">{{ form.last_name.errors }}</small>{% endif %}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label>Gender</label>
+              {{ form.gender }}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label>Date of birth</label>
+              {{ form.date_of_birth }}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label>Phone number <span class="text-danger">*</span></label>
+              {{ form.phone_number }}
+              {% if form.phone_number.errors %}<small class="text-danger">{{ form.phone_number.errors }}</small>{% endif %}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label>Email</label>
+              {{ form.email }}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label>Occupation</label>
+              {{ form.occupation }}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label>Marital status</label>
+              {{ form.marital_status }}
+            </div>
+            <div class="col-md-12 mb-3">
+              <label>Residential address</label>
+              {{ form.residential_address }}
+            </div>
+          </div>
+
+          <div class="alert alert-info small mb-0">
+            <i class="fas fa-info-circle"></i>
+            After submitting, an administrator will review your request. You'll be contacted once approved.
+          </div>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-primary"><i class="fas fa-paper-plane"></i> Submit Registration</button>
+          <a href="{% url 'core:dashboard' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

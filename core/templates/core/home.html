@@ -61,8 +61,16 @@
                 <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
                 <li class="nav-item"><a class="nav-link" href="#announcements">Announcements</a></li>
                 <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+
+                <!-- ⭐ NEW: Register button -->
+                <li class="nav-item ml-lg-2 mt-2 mt-lg-0">
+                    <a class="btn btn-light btn-sm" href="{% url 'members:register' %}">
+                        <i class="fas fa-user-plus mr-1"></i>Register
+                    </a>
+                </li>
+
                 {% if content.show_login_button %}
-                <li class="nav-item ml-lg-2">
+                <li class="nav-item ml-lg-2 mt-2 mt-lg-0">
                     <a class="btn btn-outline-light btn-sm" href="{% url 'login' %}">
                         <i class="fas fa-sign-in-alt mr-1"></i>{{ content.login_button_label }}
                     </a>
@@ -80,7 +88,16 @@
         {% if content.hero_subtitle %}
             <p class="lead">{{ content.hero_subtitle }}</p>
         {% endif %}
-       
+
+        <!-- ⭐ NEW: Register + Login call-to-action buttons -->
+        <div class="mt-4">
+            <a href="{% url 'members:register' %}" class="btn btn-light btn-lg mr-2">
+                <i class="fas fa-user-plus mr-1"></i> Register as Member
+            </a>
+            <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg">
+                <i class="fas fa-sign-in-alt mr-1"></i> Login
+            </a>
+        </div>
     </div>
 </section>
 
@@ -191,6 +208,11 @@
                 {% if sys.association_tagline %}<p class="mb-0 small">{{ sys.association_tagline }}</p>{% endif %}
             </div>
             <div class="col-md-6 text-md-right mt-3 mt-md-0">
+                <!-- ⭐ NEW: Register link -->
+                <a href="{% url 'members:register' %}" class="text-white mr-3">
+                    <i class="fas fa-user-plus mr-1"></i>Register
+                </a>
+
                 {% if content.show_login_button %}
                     <a href="{% url 'login' %}" class="text-white mr-3"><i class="fas fa-sign-in-alt mr-1"></i>{{ content.login_button_label }}</a>
                 {% endif %}

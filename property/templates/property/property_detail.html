@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-header"><div class="container-fluid"><h1>{{ item.name }}</h1></div></div>
+<section class="content"><div class="container-fluid">
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body text-center">
+          {% if item.image %}<img src="{{ item.image.url }}" class="img-fluid mb-2">{% endif %}
+          <h4>{{ item.name }}</h4>
+          <p class="text-muted">{{ item.code }}</p>
+          <span class="badge badge-primary">{{ item.get_status_display }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header"><h3 class="card-title">Details</h3></div>
+        <div class="card-body">
+          <table class="table table-bordered">
+            <tr><th>Category</th><td>{{ item.category|default:"-" }}</td></tr>
+            <tr><th>Quantity Total</th><td>{{ item.quantity_total }}</td></tr>
+            <tr><th>Quantity Available</th><td>{{ item.quantity_available }}</td></tr>
+            <tr><th>Unit Price</th><td>{{ item.unit_price }}</td></tr>
+            <tr><th>Location</th><td>{{ item.location|default:"-" }}</td></tr>
+            <tr><th>Purchase Date</th><td>{{ item.purchase_date|default:"-" }}</td></tr>
+            <tr><th>Description</th><td>{{ item.description|default:"-" }}</td></tr>
+          </table>
+          <a href="{% url 'property:property_edit' item.pk %}" class="btn btn-warning"><i class="fas fa-edit"></i> Edit</a>
+          <a href="{% url 'property:property_list' %}" class="btn btn-secondary">Back</a>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3 class="card-title">Loan History</h3></div>
+        <div class="card-body p-0">
+          <table class="table">
+            <thead><tr><th>Code</th><th>Loaner</th><th>Qty</th><th>Date</th><th>Status</th></tr></thead>
+            <tbody>
+              {% for l in loans %}
+              <tr>
+                <td><a href="{% url 'property:loan_detail' l.pk %}">{{ l.loan_code }}</a></td>
+                <td>{{ l.loaner.full_name }}</td>
+                <td>{{ l.quantity }}</td>
+                <td>{{ l.loan_date }}</td>
+                <td>{{ l.get_status_display }}</td>
+              </tr>
+              {% empty %}<tr><td colspan="5" class="text-muted text-center">No loans yet.</td></tr>{% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div></section>
+{% endblock %}
