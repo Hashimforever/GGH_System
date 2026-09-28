@@ -1,6 +1,5 @@
-{% extends "base.html" %}
+{% extends "public_base.html" %}
 {% block title %}Registration Submitted{% endblock %}
-{% block page_title %}Registration Submitted{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
@@ -11,7 +10,7 @@
         <h2 class="mt-3">Thank You!</h2>
         <p class="lead">Your registration request has been submitted.</p>
         <p>An administrator will review your information shortly. Please contact the community office if you don't hear back within 3 working days.</p>
-        <a href="{% url 'core:dashboard' %}" class="btn btn-primary mt-2">
+        <a href="{% url 'core:home' %}" class="btn btn-primary mt-2">
           <i class="fas fa-home"></i> Back to Home
         </a>
       </div>

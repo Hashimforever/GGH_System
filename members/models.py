@@ -87,7 +87,7 @@ class MemberRegistrationRequest(models.Model):
         ('rejected', 'Rejected'),
     ]
 
-    # Submitted info
+    # ── Personal info ──
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     gender = models.CharField(
@@ -107,7 +107,34 @@ class MemberRegistrationRequest(models.Model):
         default='single'
     )
 
-    # Review status
+    # ── Spouse info (used only if marital_status == 'married') ──
+    spouse_name = models.CharField(max_length=150, blank=True)
+    spouse_phone = models.CharField(max_length=20, blank=True)
+    spouse_occupation = models.CharField(max_length=100, blank=True)
+
+    # ── Applicant's parents ──
+    father_name = models.CharField(max_length=150, blank=True)
+    father_alive = models.BooleanField(default=True)
+    mother_name = models.CharField(max_length=150, blank=True)
+    mother_alive = models.BooleanField(default=True)
+
+    # ── Spouse's parents ──
+    spouse_father_name = models.CharField(max_length=150, blank=True)
+    spouse_father_alive = models.BooleanField(default=True)
+    spouse_mother_name = models.CharField(max_length=150, blank=True)
+    spouse_mother_alive = models.BooleanField(default=True)
+
+    # ── Children (free-text, one per line) ──
+    children_details = models.TextField(
+        blank=True,
+        help_text="List each child as: Name | Date of Birth | Gender (one per line)"
+    )
+
+    # ── Emergency contact ──
+    emergency_contact_name = models.CharField(max_length=150, blank=True)
+    emergency_contact_phone = models.CharField(max_length=20, blank=True)
+
+    # ── Review status ──
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     submitted_at = models.DateTimeField(auto_now_add=True)
     reviewed_at = models.DateTimeField(null=True, blank=True)

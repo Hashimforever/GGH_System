@@ -6,7 +6,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib.auth import get_user_model
 
-from .models import Member, MemberRegistrationRequest
+from .models import Member, MemberRegistrationRequest, MemberChild
 from .forms import (
     MemberForm, MemberChildFormSet, OtherFamilyMemberFormSet,
     MemberRegistrationForm, RegistrationReviewForm,
@@ -195,7 +195,7 @@ def registration_approve(request, pk):
         return redirect('members:registration_requests')
 
     if request.method == 'POST':
-        # 1. Create the Member
+        # ── 1. Create the Member with ALL submitted fields ──
         member = Member.objects.create(
             first_name=reg.first_name,
             last_name=reg.last_name,
@@ -207,9 +207,43 @@ def registration_approve(request, pk):
             occupation=reg.occupation,
             marital_status=reg.marital_status,
             status='active',
+            # Spouse
+            spouse_name=reg.spouse_name,
+            spouse_phone=reg.spouse_phone,
+            # Parents — mapped to your existing BooleanFields
+            husband_father_alive=reg.father_alive,
+            husband_mother_alive=reg.mother_alive,
+            wife_father_alive=reg.spouse_father_alive,
+            wife_mother_alive=reg.spouse_mother_alive,
+            # Emergency contact
+            emergency_contact_name=reg.emergency_contact_name,
+            emergency_contact_phone=reg.emergency_contact_phone,
         )
 
-        # 2. Optionally create a User account
+        # ── 2. Parse children_details into MemberChild records ──
+        if reg.children_details:
+            from datetime import datetime
+
+            for line in reg.children_details.strip().split('\n'):
+                line = line.strip()
+                if not line:
+                    continue
+                parts = [p.strip() for p in line.split('|')]
+                if not parts or not parts[0]:
+                    continue
+
+                child = MemberChild(member=member, name=parts[0])
+
+                # Optional DOB parsing (expects YYYY-MM-DD)
+                if len(parts) >= 2 and parts[1]:
+                    try:
+                        child.date_of_birth = datetime.strptime(parts[1], '%Y-%m-%d').date()
+                    except ValueError:
+                        pass  # skip invalid dates silently
+
+                child.save()
+
+        # ── 3. Optionally create a User account from the email ──
         username = None
         if reg.email:
             base_username = reg.email.split('@')[0]
@@ -230,7 +264,7 @@ def registration_approve(request, pk):
             except Exception as e:
                 reg.admin_notes = (reg.admin_notes or '') + f"\nUser creation failed: {e}"
 
-        # 3. Update the request
+        # ── 4. Mark the request as approved ──
         reg.status = 'approved'
         reg.reviewed_at = timezone.now()
         reg.reviewed_by = request.user
