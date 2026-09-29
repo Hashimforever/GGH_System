@@ -116,12 +116,6 @@
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
-                <a href="{% url 'property:dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' and request.resolver_match.app_name == 'property' %}active{% endif %}">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Dashboard</p>
-                </a>
-              </li>
-              <li class="nav-item">
                 <a href="{% url 'property:property_list' %}" class="nav-link {% if request.resolver_match.url_name == 'property_list' %}active{% endif %}">
                   <i class="far fa-circle nav-icon"></i>
                   <p>Properties</p>
@@ -131,18 +125,6 @@
                 <a href="{% url 'property:loaner_list' %}" class="nav-link {% if request.resolver_match.url_name == 'loaner_list' %}active{% endif %}">
                   <i class="far fa-circle nav-icon"></i>
                   <p>Loaners</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{% url 'property:loan_list' %}" class="nav-link {% if request.resolver_match.url_name == 'loan_list' %}active{% endif %}">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Loans</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{% url 'property:overdue_loans' %}" class="nav-link {% if request.resolver_match.url_name == 'overdue_loans' %}active{% endif %}">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Overdue</p>
                 </a>
               </li>
             </ul>
@@ -206,7 +188,7 @@
             </a>
           </li>
 
-          <!-- ⭐ NEW: Registration Requests (superuser-only) -->
+          <!-- ⭐ Registration Requests (superuser-only) -->
           <li class="nav-item">
             <a href="{% url 'members:registration_requests' %}" class="nav-link {% if request.resolver_match.app_name == 'members' and 'registration' in request.resolver_match.url_name %}active{% endif %}">
               <i class="nav-icon fas fa-user-clock text-warning"></i>

@@ -187,7 +187,11 @@ def registration_detail(request, pk):
 @login_required
 @user_passes_test(is_admin)
 def registration_approve(request, pk):
-    """Approve a pending registration → create Member + optional User account."""
+    """Approve a pending registration → create Member + User + send welcome email."""
+    from django.template.loader import render_to_string
+    from django.core.mail import EmailMultiAlternatives
+    from django.conf import settings as dj_settings
+
     reg = get_object_or_404(MemberRegistrationRequest, pk=pk)
 
     if reg.status != 'pending':
@@ -195,7 +199,7 @@ def registration_approve(request, pk):
         return redirect('members:registration_requests')
 
     if request.method == 'POST':
-        # ── 1. Create the Member with ALL submitted fields ──
+        # ── 1. Create the Member ──
         member = Member.objects.create(
             first_name=reg.first_name,
             last_name=reg.last_name,
@@ -207,23 +211,19 @@ def registration_approve(request, pk):
             occupation=reg.occupation,
             marital_status=reg.marital_status,
             status='active',
-            # Spouse
             spouse_name=reg.spouse_name,
             spouse_phone=reg.spouse_phone,
-            # Parents — mapped to your existing BooleanFields
             husband_father_alive=reg.father_alive,
             husband_mother_alive=reg.mother_alive,
             wife_father_alive=reg.spouse_father_alive,
             wife_mother_alive=reg.spouse_mother_alive,
-            # Emergency contact
             emergency_contact_name=reg.emergency_contact_name,
             emergency_contact_phone=reg.emergency_contact_phone,
         )
 
-        # ── 2. Parse children_details into MemberChild records ──
+        # ── 2. Parse children ──
         if reg.children_details:
             from datetime import datetime
-
             for line in reg.children_details.strip().split('\n'):
                 line = line.strip()
                 if not line:
@@ -231,20 +231,20 @@ def registration_approve(request, pk):
                 parts = [p.strip() for p in line.split('|')]
                 if not parts or not parts[0]:
                     continue
-
                 child = MemberChild(member=member, name=parts[0])
-
-                # Optional DOB parsing (expects YYYY-MM-DD)
                 if len(parts) >= 2 and parts[1]:
                     try:
                         child.date_of_birth = datetime.strptime(parts[1], '%Y-%m-%d').date()
                     except ValueError:
-                        pass  # skip invalid dates silently
-
+                        pass
                 child.save()
 
-        # ── 3. Optionally create a User account from the email ──
+        # ── 3. Create User account + SEND WELCOME EMAIL ──
         username = None
+        temp_password = None
+        email_sent = False
+        email_error = None
+
         if reg.email:
             base_username = reg.email.split('@')[0]
             username = base_username
@@ -261,20 +261,77 @@ def registration_approve(request, pk):
                     password=temp_password,
                 )
                 reg.admin_notes = (reg.admin_notes or '') + f"\nUser account created: {username}"
+
+                # ── Build and send the email ──
+                try:
+                    site_url = dj_settings.SITE_URL if hasattr(dj_settings, 'SITE_URL') \
+                               else request.build_absolute_uri('/').rstrip('/')
+                    login_url = f"{site_url}/auth/login/"
+
+                    context = {
+                        'member': member,
+                        'username': username,
+                        'password': temp_password,
+                        'login_url': login_url,
+                        'association_name': getattr(dj_settings, 'ASSOCIATION_NAME', 'GGH Community Association'),
+                    }
+
+                    subject = f"Welcome to {context['association_name']} — Your Account is Ready"
+
+                    # Render both HTML and plain-text versions
+                    text_body = render_to_string('members/emails/welcome_email.txt', context)
+                    html_body = render_to_string('members/emails/welcome_email.html', context)
+
+                    msg = EmailMultiAlternatives(
+                        subject=subject,
+                        body=text_body,
+                        from_email=dj_settings.DEFAULT_FROM_EMAIL,
+                        to=[reg.email],
+                    )
+                    msg.attach_alternative(html_body, "text/html")
+                    msg.send(fail_silently=False)
+
+                    email_sent = True
+                    reg.admin_notes = (reg.admin_notes or '') + f"\nWelcome email sent to {reg.email}"
+
+                except Exception as mail_err:
+                    email_error = str(mail_err)
+                    reg.admin_notes = (reg.admin_notes or '') + f"\nEmail failed: {mail_err}"
+
             except Exception as e:
                 reg.admin_notes = (reg.admin_notes or '') + f"\nUser creation failed: {e}"
 
-        # ── 4. Mark the request as approved ──
+        # ── 4. Mark approved ──
         reg.status = 'approved'
         reg.reviewed_at = timezone.now()
         reg.reviewed_by = request.user
         reg.save()
 
-        messages.success(
-            request,
-            f"Approved: {reg.full_name} is now member {member.member_id}."
-            + (f" User account '{username}' created." if username else "")
-        )
+        # ── 5. Show result message ──
+        if email_sent:
+            messages.success(
+                request,
+                f"✅ Approved: {reg.full_name} is now member {member.member_id}. "
+                f"Welcome email sent to {reg.email}."
+            )
+        elif email_error:
+            messages.warning(
+                request,
+                f"⚠️ Approved: {reg.full_name} is now member {member.member_id}. "
+                f"BUT the welcome email failed: {email_error}"
+            )
+        elif not reg.email:
+            messages.warning(
+                request,
+                f"⚠️ Approved: {reg.full_name} is now member {member.member_id}. "
+                f"No email on file — please contact them manually."
+            )
+        else:
+            messages.success(
+                request,
+                f"Approved: {reg.full_name} is now member {member.member_id}."
+            )
+
         return redirect('members:registration_requests')
 
     return render(request, 'members/registration_approve_confirm.html', {'reg': reg})
