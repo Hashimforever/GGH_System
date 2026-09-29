@@ -41,6 +41,14 @@ class Property(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # ⭐ FINANCE INTEGRATION
+    deduct_from_finance = models.BooleanField(
+        default=False,
+        verbose_name="Deduct cost from Finance (creates a Withdrawal)",
+        help_text="When checked, the total cost (unit_price × quantity_total) "
+                  "is recorded as a withdrawal in the Finance module."
+    )
+
     class Meta:
         verbose_name_plural = "Properties"
         ordering = ['name']
@@ -51,6 +59,14 @@ class Property(models.Model):
     @property
     def is_low_stock(self):
         return self.quantity_available <= 1
+
+    @property
+    def total_cost(self):
+        """Total purchase cost = unit_price × quantity_total."""
+        try:
+            return (self.unit_price or 0) * (self.quantity_total or 0)
+        except Exception:
+            return 0
 
 
 class Loaner(models.Model):

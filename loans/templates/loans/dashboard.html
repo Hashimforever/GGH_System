@@ -6,7 +6,9 @@
 {% block content %}
 <div class="row">
     <div class="col-12 mb-3">
-        <a href="{% url 'loans:apply' %}" class="btn btn-info">Apply for Loan</a>
+        <a href="{% url 'loans:apply' %}" class="btn btn-info">
+            <i class="fas fa-plus"></i> Apply for Loan
+        </a>
     </div>
 
     <div class="col-md-12">
@@ -22,6 +24,7 @@
                             <th>Amount</th>
                             <th>Status</th>
                             <th>Date</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -29,8 +32,39 @@
                         <tr>
                             <td>{{ loan.member }}</td>
                             <td>${{ loan.amount }}</td>
-                            <td>{{ loan.get_status_display }}</td>
+                            <td>
+                                {% if loan.status == 'active' %}
+                                    <span class="badge badge-success">Active</span>
+                                {% elif loan.status == 'pending' %}
+                                    <span class="badge badge-warning">Pending</span>
+                                {% elif loan.status == 'repaid' %}
+                                    <span class="badge badge-info">Fully Repaid</span>
+                                {% elif loan.status == 'overdue' %}
+                                    <span class="badge badge-danger">Overdue</span>
+                                {% elif loan.status == 'cancelled' %}
+                                    <span class="badge badge-secondary">Cancelled</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">{{ loan.get_status_display }}</span>
+                                {% endif %}
+                            </td>
                             <td>{{ loan.application_date }}</td>
+                            <td>
+                                <a href="{% url 'loans:loan_detail' loan.pk %}"
+                                   class="btn btn-info btn-sm" title="View details">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+
+                                {% if loan.status == 'active' or loan.status == 'overdue' %}
+                                <a href="{% url 'loans:loan_return' loan.pk %}"
+                                   class="btn btn-success btn-sm" title="Return this loan">
+                                    <i class="fas fa-undo"></i> Return
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-3">No loans found.</td>
                         </tr>
                         {% endfor %}
                     </tbody>

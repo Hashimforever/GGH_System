@@ -18,7 +18,7 @@ class PropertyForm(forms.ModelForm):
         model = Property
         fields = ['name', 'code', 'category', 'description', 'quantity_total',
                   'quantity_available', 'unit_price', 'purchase_date', 'status',
-                  'image', 'location', 'notes']
+                  'image', 'location', 'notes', 'deduct_from_finance']   # ⭐ NEW
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'code': forms.TextInput(attrs={'class': 'form-control'}),
@@ -32,6 +32,7 @@ class PropertyForm(forms.ModelForm):
             'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
             'location': forms.TextInput(attrs={'class': 'form-control'}),
             'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'deduct_from_finance': forms.CheckboxInput(attrs={'class': 'form-check-input'}),   # ⭐ NEW
         }
 
 
@@ -155,7 +156,6 @@ class LoanerWithLoanForm(forms.ModelForm):
         loan_date = cleaned.get('loan_date')
         expected_return = cleaned.get('expected_return_date')
 
-        # If a material was chosen, we need the quantity + return date
         if prop:
             if not qty or qty < 1:
                 self.add_error('quantity', "Quantity must be at least 1 when loaning a material.")
@@ -172,7 +172,6 @@ class LoanerWithLoanForm(forms.ModelForm):
     def save(self, commit=True):
         loaner = super().save(commit=commit)
 
-        # If a material was chosen, create the loan record
         prop = self.cleaned_data.get('property_item')
         if prop and commit:
             qty = self.cleaned_data.get('quantity') or 1
@@ -190,7 +189,6 @@ class LoanerWithLoanForm(forms.ModelForm):
                 handled_by=getattr(self, 'current_user', None),
             )
 
-            # Decrement available stock
             prop.quantity_available = max(0, prop.quantity_available - qty)
             if prop.quantity_available == 0:
                 prop.status = 'loaned'

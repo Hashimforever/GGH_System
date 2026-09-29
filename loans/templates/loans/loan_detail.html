@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Loan #{{ loan.id }}{% endblock %}
+{% block page_title %}Loan #{{ loan.id }}{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-4">
+    <div class="card card-primary">
+      <div class="card-header"><h3 class="card-title">Loan Details</h3></div>
+      <div class="card-body">
+        <p><strong>Member:</strong> {{ loan.member }}</p>
+        <p><strong>Amount:</strong> {{ loan.amount }}</p>
+        <p><strong>Applied:</strong> {{ loan.application_date }}</p>
+        <p><strong>Status:</strong>
+          {% if loan.status == 'active' %}<span class="badge badge-success">Active</span>
+          {% elif loan.status == 'pending' %}<span class="badge badge-warning">Pending</span>
+          {% elif loan.status == 'repaid' %}<span class="badge badge-info">Fully Repaid</span>
+          {% elif loan.status == 'overdue' %}<span class="badge badge-danger">Overdue</span>
+          {% else %}<span class="badge badge-secondary">{{ loan.get_status_display }}</span>{% endif %}
+        </p>
+
+        {% if loan.status == 'active' or loan.status == 'overdue' %}
+        <a href="{% url 'loans:loan_return' loan.pk %}" class="btn btn-success btn-block">
+          <i class="fas fa-undo"></i> Return Loan
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title">Repayment History</h3></div>
+      <div class="card-body p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr><th>Date</th><th>Amount</th><th>Method</th><th>Reference</th><th>Recorded By</th></tr>
+          </thead>
+          <tbody>
+            {% for r in repayments %}
+            <tr>
+              <td>{{ r.repayment_date }}</td>
+              <td>{{ r.amount }}</td>
+              <td>{{ r.payment_method|default:"-" }}</td>
+              <td>{{ r.reference_number|default:"-" }}</td>
+              <td>{{ r.recorded_by|default:"-" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center text-muted py-3">No repayments recorded yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

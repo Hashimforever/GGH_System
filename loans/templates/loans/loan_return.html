@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Return Loan #{{ loan.id }}{% endblock %}
+{% block page_title %}Return Loan #{{ loan.id }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card card-success">
+      <div class="card-header">
+        <h3 class="card-title">
+          <i class="fas fa-undo"></i> Confirm Loan Return
+        </h3>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="card-body">
+
+          <div class="alert alert-info">
+            <strong>Member:</strong> {{ loan.member }}<br>
+            <strong>Loan Amount:</strong> {{ loan.amount }}<br>
+            <strong>Status:</strong> {{ loan.get_status_display }}
+          </div>
+
+          <p>
+            When you confirm:
+          </p>
+          <ul>
+            <li>💰 <strong>{{ loan.amount }}</strong> will be added back to <strong>Total Balance</strong></li>
+            <li>📉 <strong>Unreturned Loans</strong> will decrease by <strong>{{ loan.amount }}</strong></li>
+            <li>📋 A ledger entry will be created: <em>"Loan returned by {{ loan.member }}"</em></li>
+            <li>✅ Loan status will be set to <strong>Fully Repaid</strong></li>
+          </ul>
+
+          <hr>
+
+          <div class="form-group">
+            <label>Return Date</label>
+            <input type="date" name="repayment_date" class="form-control"
+                   value="{{ today|default:'' }}">
+          </div>
+
+          <div class="form-group">
+            <label>Payment Method</label>
+            <select name="payment_method" class="form-control">
+              <option value="">— Select —</option>
+              <option value="Cash">Cash</option>
+              <option value="Bank Transfer">Bank Transfer</option>
+              <option value="Mobile Money">Mobile Money</option>
+              <option value="Cheque">Cheque</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Reference Number</label>
+            <input type="text" name="reference_number" class="form-control"
+                   placeholder="Receipt # / transaction ID (optional)">
+          </div>
+
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-success">
+            <i class="fas fa-check"></i> Confirm Return
+          </button>
+          <a href="{% url 'loans:dashboard' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -7,25 +7,38 @@ from .forms import WithdrawalForm, IncomeForm
 from django.contrib import messages
 from django.utils import timezone
 
+
 @login_required
 def finance_dashboard(request):
     transactions = FinancialTransaction.objects.all().order_by('-transaction_date')[:50]
     withdrawals = Withdrawal.objects.filter(status='pending')
     pending_loans = Loan.objects.filter(status='pending')
 
-    # Metrics Calculations
+    # ── Metrics Calculations ──
     all_tx = FinancialTransaction.objects.all()
-    total_income = all_tx.filter(transaction_type__startswith='income_').aggregate(Sum('amount'))['amount__sum'] or 0
-    total_withdrawal = all_tx.filter(transaction_type__startswith='expense_').aggregate(Sum('amount'))['amount__sum'] or 0
+
+    total_income = all_tx.filter(
+        transaction_type__startswith='income_'
+    ).aggregate(Sum('amount'))['amount__sum'] or 0
+
+    total_withdrawal = all_tx.filter(
+        transaction_type__startswith='expense_'
+    ).aggregate(Sum('amount'))['amount__sum'] or 0
+
     total_balance = total_income - total_withdrawal
-    
-    returned_loans = all_tx.filter(transaction_type='income_loan_repayment').aggregate(Sum('amount'))['amount__sum'] or 0
-    active_loans = Loan.objects.filter(status__in=['active', 'overdue'])
-    unreturned_loans = active_loans.aggregate(Sum('amount'))['amount__sum'] or 0
-    # True unreturned would be principal minus repayments, but this is a close approximation for outstanding original principal.
-    # Let's subtract returned loans from the active principal if they apply, or just show Total Disbursed vs Total Returned.
-    # Actually, let's keep it simple: Total Disbursed Loans - Total Returned Loans = Unreturned Loans Balance
-    total_disbursed = all_tx.filter(transaction_type='expense_loan_disbursement').aggregate(Sum('amount'))['amount__sum'] or 0
+
+    # ── Loan metrics ──
+    # Total amount of loans returned (income_loan_repayment transactions)
+    returned_loans = all_tx.filter(
+        transaction_type='income_loan_repayment'
+    ).aggregate(Sum('amount'))['amount__sum'] or 0
+
+    # Total amount disbursed as loans (expense_loan_disbursement transactions)
+    total_disbursed = all_tx.filter(
+        transaction_type='expense_loan_disbursement'
+    ).aggregate(Sum('amount'))['amount__sum'] or 0
+
+    # Unreturned = disbursed − returned
     unreturned_loans = total_disbursed - returned_loans
 
     return render(request, 'finance/dashboard.html', {
@@ -39,6 +52,7 @@ def finance_dashboard(request):
         'unreturned_loans': unreturned_loans,
     })
 
+
 @login_required
 def approve_withdrawal(request, pk):
     withdrawal = get_object_or_404(Withdrawal, pk=pk, status='pending')
@@ -46,19 +60,50 @@ def approve_withdrawal(request, pk):
         withdrawal.status = 'approved'
         withdrawal.approved_by = request.user
         withdrawal.save()
-        messages.success(request, f"Withdrawal for '{withdrawal.purpose}' approved. Balance updated.")
+
+        # ⭐ Create a matching FinancialTransaction so it reduces the balance
+        FinancialTransaction.objects.create(
+            transaction_type='expense_withdrawal',
+            amount=withdrawal.amount,
+            description=f"Withdrawal: {withdrawal.purpose}",
+            withdrawal=withdrawal,
+        )
+
+        messages.success(
+            request,
+            f"Withdrawal for '{withdrawal.purpose}' approved. "
+            f"💰 {withdrawal.amount} deducted from balance."
+        )
     return redirect('finance:dashboard')
+
 
 @login_required
 def approve_loan(request, pk):
+    """Approve a pending loan → creates the expense_loan_disbursement transaction."""
     loan = get_object_or_404(Loan, pk=pk, status='pending')
     if request.method == 'POST':
         loan.status = 'active'
         loan.approval_date = timezone.now().date()
         loan.disbursement_date = timezone.now().date()
         loan.save()
-        messages.success(request, f"Loan for {loan.member} approved and marked as withdrawal.")
+
+        # ⭐ Create the disbursement transaction (money leaves the fund)
+        FinancialTransaction.objects.create(
+            transaction_type='expense_loan_disbursement',
+            amount=loan.amount,
+            description=f"Loan disbursed to {loan.member} (Loan #{loan.id})",
+            loan_disbursement=loan,
+            member=loan.member,
+        )
+
+        messages.success(
+            request,
+            f"Loan of {loan.amount} for {loan.member} approved. "
+            f"💰 {loan.amount} deducted from balance. "
+            f"📈 Unreturned Loans increased by {loan.amount}."
+        )
     return redirect('finance:dashboard')
+
 
 @login_required
 def add_withdrawal(request):
@@ -73,6 +118,7 @@ def add_withdrawal(request):
     else:
         form = WithdrawalForm()
     return render(request, 'finance/withdrawal_form.html', {'form': form})
+
 
 @login_required
 def record_income(request):
