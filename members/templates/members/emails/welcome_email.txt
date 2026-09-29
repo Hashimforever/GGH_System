@@ -1,0 +1,22 @@
+Welcome to {{ association_name|default:"GGH Community Association" }}!
+
+Dear {{ member.first_name }} {{ member.last_name }},
+
+Your registration has been APPROVED. Welcome to the community!
+
+Your Member ID: {{ member.member_id }}
+
+========================================
+YOUR LOGIN CREDENTIALS
+========================================
+Login URL:  {{ login_url }}
+Username:   {{ username }}
+Password:   {{ password }}
+
+IMPORTANT: Please change your password immediately after first login.
+
+If you have any questions, contact the community office.
+
+--
+© {% now "Y" %} {{ association_name|default:"GGH Community Association" }}
+This is an automated message. Please do not reply.

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to GGH Community</title>
+</head>
+<body style="margin: 0; padding: 0; background: #f4f6f9; font-family: 'Segoe UI', Tahoma, sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background: #f4f6f9; padding: 30px 0;">
+    <tr>
+        <td align="center">
+
+            <table width="600" cellpadding="0" cellspacing="0" style="background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,.08);">
+
+                <!-- ═══ HEADER ═══ -->
+                <tr>
+                    <td style="background: #007bff; padding: 25px 30px; color: #ffffff;">
+                        <h1 style="margin: 0; font-size: 22px;">
+                            🏠 {{ association_name|default:"GGH Community Association" }}
+                        </h1>
+                    </td>
+                </tr>
+
+                <!-- ═══ BODY ═══ -->
+                <tr>
+                    <td style="padding: 35px 30px;">
+
+                        <p style="font-size: 20px; font-weight: 700; color: #28a745; margin: 0 0 10px;">
+                            ✅ Congratulations, {{ member.first_name }}!
+                        </p>
+
+                        <p style="font-size: 16px; color: #333; margin: 0 0 20px;">
+                            Your registration request has been
+                            <strong style="color: #28a745;">approved</strong>.
+                            Welcome to the community!
+                        </p>
+
+                        <p style="font-size: 14px; color: #555; margin: 0 0 25px;">
+                            <strong>Your Member ID:</strong>
+                            <span style="background: #e7f3ff; color: #0056b3; padding: 4px 10px; border-radius: 4px; font-family: monospace; font-size: 15px;">
+                                {{ member.member_id }}
+                            </span>
+                        </p>
+
+                        <!-- ── CREDENTIALS BOX ── -->
+                        <table width="100%" cellpadding="0" cellspacing="0" style="background: #f8f9fa; border-left: 4px solid #007bff; border-radius: 4px; margin: 20px 0;">
+                            <tr>
+                                <td style="padding: 20px;">
+                                    <p style="margin: 0 0 12px; font-size: 15px; font-weight: 700; color: #007bff;">
+                                        🔐 Your Login Credentials
+                                    </p>
+
+                                    <table width="100%" cellpadding="6" cellspacing="0" style="font-size: 14px;">
+                                        <tr>
+                                            <td style="color: #666; width: 120px;">Login URL:</td>
+                                            <td><a href="{{ login_url }}" style="color: #007bff; word-break: break-all;">{{ login_url }}</a></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="color: #666;">Username:</td>
+                                            <td><strong style="font-family: monospace; background: #fff; padding: 2px 8px; border-radius: 3px; border: 1px solid #ddd;">{{ username }}</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="color: #666;">Password:</td>
+                                            <td><strong style="font-family: monospace; background: #fff; padding: 2px 8px; border-radius: 3px; border: 1px solid #ddd;">{{ password }}</strong></td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- ── WARNING ── -->
+                        <table width="100%" cellpadding="0" cellspacing="0" style="background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px; margin: 20px 0;">
+                            <tr>
+                                <td style="padding: 15px; font-size: 13px; color: #856404;">
+                                    <strong>⚠️ Important:</strong>
+                                    For your security, please change your password immediately after your first login.
+                                    Go to your profile → Change Password.
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- ── CALL TO ACTION ── -->
+                        <div style="text-align: center; margin: 30px 0;">
+                            <a href="{{ login_url }}"
+                               style="display: inline-block; background: #007bff; color: #ffffff; padding: 12px 32px; text-decoration: none; border-radius: 5px; font-weight: 600; font-size: 15px;">
+                                🔑 Login to Your Account
+                            </a>
+                        </div>
+
+                        <p style="font-size: 13px; color: #777; margin-top: 30px; line-height: 1.6;">
+                            If you have any questions or did not request this registration,
+                            please contact the community office.
+                        </p>
+
+                    </td>
+                </tr>
+
+                <!-- ═══ FOOTER ═══ -->
+                <tr>
+                    <td style="background: #343a40; padding: 20px; color: #adb5bd; text-align: center; font-size: 12px;">
+                        <p style="margin: 0 0 5px;">
+                            &copy; {% now "Y" %} {{ association_name|default:"GGH Community Association" }}.
+                            All rights reserved.
+                        </p>
+                        <p style="margin: 0; font-size: 11px;">
+                            This is an automated message. Please do not reply.
+                        </p>
+                    </td>
+                </tr>
+
+            </table>
+
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

@@ -1,10 +1,9 @@
-{% extends "base.html" %}
+{% extends "public_base.html" %}
 {% block title %}Register{% endblock %}
-{% block page_title %}Register as Member{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
-  <div class="col-md-8">
+  <div class="col-md-9">
     <div class="card card-primary">
       <div class="card-header">
         <h3 class="card-title"><i class="fas fa-user-plus"></i> Membership Registration</h3>
@@ -12,20 +11,23 @@
       <form method="post" novalidate>
         {% csrf_token %}
         <div class="card-body">
+
           {% if form.non_field_errors %}
             <div class="alert alert-danger">{{ form.non_field_errors }}</div>
           {% endif %}
 
+          <!-- ═══════════ 1. PERSONAL INFORMATION ═══════════ -->
+          <h5 class="text-primary mb-3"><i class="fas fa-user"></i> Personal Information</h5>
           <div class="row">
             <div class="col-md-6 mb-3">
               <label>First name <span class="text-danger">*</span></label>
               {{ form.first_name }}
-              {% if form.first_name.errors %}<small class="text-danger">{{ form.first_name.errors }}</small>{% endif %}
+              {% if form.first_name.errors %}<small class="text-danger d-block">{{ form.first_name.errors }}</small>{% endif %}
             </div>
             <div class="col-md-6 mb-3">
               <label>Last name <span class="text-danger">*</span></label>
               {{ form.last_name }}
-              {% if form.last_name.errors %}<small class="text-danger">{{ form.last_name.errors }}</small>{% endif %}
+              {% if form.last_name.errors %}<small class="text-danger d-block">{{ form.last_name.errors }}</small>{% endif %}
             </div>
             <div class="col-md-6 mb-3">
               <label>Gender</label>
@@ -38,7 +40,7 @@
             <div class="col-md-6 mb-3">
               <label>Phone number <span class="text-danger">*</span></label>
               {{ form.phone_number }}
-              {% if form.phone_number.errors %}<small class="text-danger">{{ form.phone_number.errors }}</small>{% endif %}
+              {% if form.phone_number.errors %}<small class="text-danger d-block">{{ form.phone_number.errors }}</small>{% endif %}
             </div>
             <div class="col-md-6 mb-3">
               <label>Email</label>
@@ -58,17 +60,138 @@
             </div>
           </div>
 
+          <hr>
+
+          <!-- ═══════════ 2. SPOUSE (only if married) ═══════════ -->
+          <div id="spouse-section" style="display:none;">
+            <h5 class="text-primary mb-3"><i class="fas fa-heart"></i> Spouse Information</h5>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label>Spouse full name</label>
+                {{ form.spouse_name }}
+                {% if form.spouse_name.errors %}<small class="text-danger d-block">{{ form.spouse_name.errors }}</small>{% endif %}
+              </div>
+              <div class="col-md-6 mb-3">
+                <label>Spouse phone</label>
+                {{ form.spouse_phone }}
+              </div>
+              <div class="col-md-6 mb-3">
+                <label>Spouse occupation</label>
+                {{ form.spouse_occupation }}
+              </div>
+            </div>
+
+            <h6 class="text-muted mb-3 mt-2"><i class="fas fa-user-friends"></i> Spouse's Parents</h6>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label>Spouse's father name</label>
+                {{ form.spouse_father_name }}
+              </div>
+              <div class="col-md-6 mb-3 pt-4">
+                <div class="form-check">
+                  {{ form.spouse_father_alive }}
+                  <label class="form-check-label ml-1">Spouse's father is alive</label>
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label>Spouse's mother name</label>
+                {{ form.spouse_mother_name }}
+              </div>
+              <div class="col-md-6 mb-3 pt-4">
+                <div class="form-check">
+                  {{ form.spouse_mother_alive }}
+                  <label class="form-check-label ml-1">Spouse's mother is alive</label>
+                </div>
+              </div>
+            </div>
+            <hr>
+          </div>
+
+          <!-- ═══════════ 3. YOUR PARENTS ═══════════ -->
+          <h5 class="text-primary mb-3"><i class="fas fa-users"></i> Your Parents</h5>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label>Father's name</label>
+              {{ form.father_name }}
+            </div>
+            <div class="col-md-6 mb-3 pt-4">
+              <div class="form-check">
+                {{ form.father_alive }}
+                <label class="form-check-label ml-1">Father is alive</label>
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label>Mother's name</label>
+              {{ form.mother_name }}
+            </div>
+            <div class="col-md-6 mb-3 pt-4">
+              <div class="form-check">
+                {{ form.mother_alive }}
+                <label class="form-check-label ml-1">Mother is alive</label>
+              </div>
+            </div>
+          </div>
+
+          <hr>
+
+          <!-- ═══════════ 4. CHILDREN ═══════════ -->
+          <h5 class="text-primary mb-3"><i class="fas fa-child"></i> Children</h5>
+          <div class="mb-3">
+            <label>Children details <small class="text-muted">(one per line — Name | Date of Birth | Gender)</small></label>
+            {{ form.children_details }}
+            <small class="form-text text-muted">
+              Leave blank if you have no children.
+            </small>
+          </div>
+
+          <hr>
+
+          <!-- ═══════════ 5. EMERGENCY CONTACT ═══════════ -->
+          <h5 class="text-primary mb-3"><i class="fas fa-phone-alt"></i> Emergency Contact</h5>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label>Contact name</label>
+              {{ form.emergency_contact_name }}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label>Contact phone</label>
+              {{ form.emergency_contact_phone }}
+            </div>
+          </div>
+
           <div class="alert alert-info small mb-0">
             <i class="fas fa-info-circle"></i>
             After submitting, an administrator will review your request. You'll be contacted once approved.
           </div>
         </div>
+
         <div class="card-footer">
-          <button class="btn btn-primary"><i class="fas fa-paper-plane"></i> Submit Registration</button>
-          <a href="{% url 'core:dashboard' %}" class="btn btn-secondary">Cancel</a>
+          <button class="btn btn-primary">
+            <i class="fas fa-paper-plane"></i> Submit Registration
+          </button>
+          <a href="{% url 'core:home' %}" class="btn btn-secondary">Cancel</a>
         </div>
       </form>
     </div>
   </div>
 </div>
+
+<!-- ⭐ Show/hide spouse section based on marital status -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var maritalSelect = document.getElementById('id_marital_status');
+    var spouseSection = document.getElementById('spouse-section');
+    if (!maritalSelect || !spouseSection) return;
+
+    function toggleSpouse() {
+      if (maritalSelect.value === 'married') {
+        spouseSection.style.display = 'block';
+      } else {
+        spouseSection.style.display = 'none';
+      }
+    }
+    maritalSelect.addEventListener('change', toggleSpouse);
+    toggleSpouse();  // run on page load
+  });
+</script>
 {% endblock %}

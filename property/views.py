@@ -10,6 +10,68 @@ from .forms import (PropertyForm, LoanerForm, PropertyLoanForm,
                     CategoryForm, ReturnLoanForm, LoanerWithLoanForm)
 
 
+# ═══════════════════════════════════════════════════════════════
+#   HELPER — Finance integration
+# ═══════════════════════════════════════════════════════════════
+
+def _create_property_withdrawal(prop, user):
+    """Create a Withdrawal + FinancialTransaction for a property purchase."""
+    from finance.models import Withdrawal, FinancialTransaction
+
+    if not prop.total_cost or prop.total_cost <= 0:
+        return None
+
+    withdrawal = Withdrawal.objects.create(
+        category='Property Purchase',
+        amount=prop.total_cost,
+        purpose=f"Purchase: {prop.name} ({prop.code})",
+        description=(
+            f"Auto-generated from Property Records.\n"
+            f"Quantity: {prop.quantity_total} × Unit Price: {prop.unit_price}"
+        ),
+        transaction_date=prop.purchase_date or timezone.now().date(),
+        status='approved',
+        recorded_by=user,
+        approved_by=user,
+    )
+    FinancialTransaction.objects.create(
+        transaction_type='expense_withdrawal',
+        amount=prop.total_cost,
+        description=f"Property Purchase: {prop.name} ({prop.code})",
+        withdrawal=withdrawal,
+    )
+    return withdrawal
+
+
+def _refund_property_finance(prop, user):
+    """
+    Refund finance entries for this property by creating an offsetting income
+    transaction. Looks up withdrawals by property code keyword.
+    """
+    from finance.models import Withdrawal, FinancialTransaction
+
+    keyword = f"({prop.code})"
+    withdrawals = Withdrawal.objects.filter(
+        purpose__icontains=keyword,
+        category='Property Purchase',
+    )
+
+    refunded = 0
+    for w in withdrawals:
+        FinancialTransaction.objects.create(
+            transaction_type='income_other',
+            amount=w.amount,
+            description=f"Refund: Property adjustment for {prop.name} ({prop.code})",
+            withdrawal=None,
+        )
+        w.description = (w.description or '') + \
+            f"\n[REVERSED by {user.username} on {timezone.now().date()}]"
+        w.save()
+        refunded += w.amount
+
+    return refunded
+
+
 # ---------- DASHBOARD ----------
 @login_required
 def property_dashboard(request):
@@ -63,8 +125,18 @@ def property_create(request):
     if request.method == 'POST':
         form = PropertyForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
-            messages.success(request, "Property added successfully.")
+            prop = form.save()
+
+            # ⭐ If deduct_from_finance is checked → create a Withdrawal + Transaction
+            if prop.deduct_from_finance and prop.total_cost and prop.total_cost > 0:
+                _create_property_withdrawal(prop, request.user)
+                messages.success(
+                    request,
+                    f"Property '{prop.name}' added. "
+                    f"💰 {prop.total_cost} deducted from Finance balance."
+                )
+            else:
+                messages.success(request, "Property added successfully.")
             return redirect('property:property_list')
     else:
         form = PropertyForm()
@@ -74,11 +146,47 @@ def property_create(request):
 @login_required
 def property_edit(request, pk):
     item = get_object_or_404(Property, pk=pk)
+
+    # Capture old values BEFORE the form is saved
+    old_cost = item.total_cost or 0
+    old_deduct = item.deduct_from_finance
+
     if request.method == 'POST':
         form = PropertyForm(request.POST, request.FILES, instance=item)
         if form.is_valid():
-            form.save()
-            messages.success(request, "Property updated successfully.")
+            prop = form.save()
+            new_cost = prop.total_cost or 0
+            new_deduct = prop.deduct_from_finance
+
+            # Case 1: Not deducting before → NOW deducting → create withdrawal
+            if (not old_deduct) and new_deduct and new_cost > 0:
+                _create_property_withdrawal(prop, request.user)
+                messages.success(
+                    request,
+                    f"Property updated. 💰 {new_cost} deducted from Finance balance."
+                )
+
+            # Case 2: Deducting before → NOW not deducting → refund
+            elif old_deduct and (not new_deduct):
+                refunded = _refund_property_finance(prop, request.user)
+                messages.success(
+                    request,
+                    f"Property updated. 💰 {refunded} refunded to Finance balance."
+                )
+
+            # Case 3: Deducting both → amount changed → refund old + create new
+            elif old_deduct and new_deduct and old_cost != new_cost:
+                _refund_property_finance(prop, request.user)
+                if new_cost > 0:
+                    _create_property_withdrawal(prop, request.user)
+                messages.success(
+                    request,
+                    f"Property updated. Finance adjusted: {old_cost} → {new_cost}."
+                )
+
+            else:
+                messages.success(request, "Property updated successfully.")
+
             return redirect('property:property_list')
     else:
         form = PropertyForm(instance=item)
@@ -96,8 +204,16 @@ def property_detail(request, pk):
 def property_delete(request, pk):
     item = get_object_or_404(Property, pk=pk)
     if request.method == 'POST':
+        # ⭐ If this property deducted from finance → refund on delete
+        if item.deduct_from_finance and item.total_cost and item.total_cost > 0:
+            refunded = _refund_property_finance(item, request.user)
+            messages.success(
+                request,
+                f"Property '{item.name}' deleted. 💰 {refunded} refunded to Finance balance."
+            )
+        else:
+            messages.success(request, "Property deleted.")
         item.delete()
-        messages.success(request, "Property deleted.")
         return redirect('property:property_list')
     return render(request, 'property/property_confirm_delete.html', {'item': item})
 
@@ -123,7 +239,6 @@ def loaner_create(request):
             form.current_user = request.user
             loaner = form.save()
 
-            # Notify user
             if form.cleaned_data.get('property_item'):
                 messages.success(
                     request,

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GGH System | {% block title %}Welcome{% endblock %}</title>
+
+  <!-- Google Font -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <!-- Bootstrap 4 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <!-- AdminLTE (for nice button/card styles) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+
+  <style>
+    body {
+      background: #f4f6f9;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* Top public navbar */
+    .public-navbar {
+      background: #ffffff;
+      border-bottom: 1px solid #e3e6ea;
+      padding: 12px 0;
+      margin-bottom: 30px;
+    }
+    .public-navbar .brand {
+      font-weight: 700;
+      color: #007bff;
+      text-decoration: none;
+      font-size: 1.25rem;
+    }
+    .public-navbar .brand:hover {
+      text-decoration: none;
+      color: #0056b3;
+    }
+  </style>
+
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- ⭐ Public top navbar (no sidebar) -->
+<nav class="public-navbar">
+  <div class="container d-flex justify-content-between align-items-center">
+    <a href="{% url 'core:home' %}" class="brand">
+      <i class="fas fa-home mr-1"></i> GGH Community Association
+    </a>
+    <div>
+      <a href="{% url 'core:home' %}" class="btn btn-outline-secondary btn-sm mr-2">
+        <i class="fas fa-arrow-left"></i> Home
+      </a>
+      <a href="{% url 'login' %}" class="btn btn-primary btn-sm">
+        <i class="fas fa-sign-in-alt"></i> Login
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ⭐ Main content (no sidebar, centered) -->
+<main class="container pb-5">
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="text-center text-muted py-4">
+  <small>&copy; {% now "Y" %} GGH Community Association. All rights reserved.</small>
+</footer>
+
+<!-- jQuery + Bootstrap -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

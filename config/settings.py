@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     'reports',
     'audit',
     'documents',
-    'property',   # ⭐ NEW: Property Records app
+    'property',   # ⭐ Property Records app
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
@@ -135,14 +135,34 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 
-# Email
-# https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
+# ═══════════════════════════════════════════════════════════════
+#   EMAIL CONFIGURATION (Django 6.1+ uses MAILERS)
+# ═══════════════════════════════════════════════════════════════
 
+# ── For DEVELOPMENT: prints emails to terminal instead of sending ──
 MAILERS = {
     'default': {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+DEFAULT_FROM_EMAIL = 'GGH Community <noreply@gghcommunity.org>'
+
+# ── For PRODUCTION: real Gmail SMTP (uncomment when ready) ──
+# MAILERS = {
+#     'default': {
+#         'BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
+#         'OPTIONS': {
+#             'host': 'smtp.gmail.com',
+#             'port': 587,
+#             'use_tls': True,
+#             'username': 'your-email@gmail.com',
+#             'password': 'your-16-char-app-password',
+#         },
+#     },
+# }
+# DEFAULT_FROM_EMAIL = 'GGH Community <your-email@gmail.com>'
+
 
 # Media files
 MEDIA_URL = '/media/'
@@ -179,3 +199,15 @@ JAZZMIN_UI_TWEAKS = {
     'sidebar_nav_child_indent': True,
     'sidebar_nav_compact_style': False,
 }
+
+
+# ═══════════════════════════════════════════════════════════════
+#   PROJECT-SPECIFIC SETTINGS
+# ═══════════════════════════════════════════════════════════════
+
+# Your association's display name (used in emails, headers, etc.)
+ASSOCIATION_NAME = 'GGH Community Association'
+
+# Your site's root URL — used to build login links in emails.
+# Change this when you deploy online.
+SITE_URL = 'http://127.0.0.1:8000'
